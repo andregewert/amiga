@@ -1,4 +1,4 @@
-ccbin = /opt/vbcc/bin/vc
+ccbin = vc
 ccopts = -c99
 includes = -I${NDK_INC}
 libs = -lamiga -lauto

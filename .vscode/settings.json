@@ -6,6 +6,5 @@
         "intuition_protos.h": "c",
         "dos_protos.h": "c",
         "string.h": "c"
-    },
-    "sonarlint.pathToCompileCommands": "${workspaceFolder}/.vscode/compile_commands.json"
+    }
 }
