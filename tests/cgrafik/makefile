@@ -1,8 +1,8 @@
 # Optionen für vbcc mit Target Amiga
 CC = vc
-CCOPT = -I${NDK_INC}
+CCOPT = -I${VBCC}/posix/include -I${NDK_INC} -L${VBCC}/posix/lib
 LD = vc
-LDOPT = -lamiga -lauto
+LDOPT = -lamiga -lauto -lposix
 
 #CC = m68k-amigaos-gcc
 #CCOPT =
