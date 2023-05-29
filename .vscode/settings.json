@@ -5,6 +5,10 @@
         "all_protos.h": "c",
         "intuition_protos.h": "c",
         "dos_protos.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "types.h": "c",
+        "lowlevel_protos.h": "c",
+        "libraries.h": "c",
+        "lowlevel.h": "c"
     }
 }

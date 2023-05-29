@@ -3,7 +3,7 @@ ccopts = -c99
 includes = -I${NDK_INC}
 libs = -lamiga -lauto
 mathlib = -lmsoft
-cc = $(ccbin) $(copts) $(includes) $(libs)
+cc = $(ccbin) $(ccopts) $(includes) $(libs)
 
 all: dirs window snakey
 
@@ -18,6 +18,9 @@ window: dirs window.c
 
 snakey: dirs snakey.c
 		$(cc) snakey.c -o build/snakey
+
+lang: dirs lang.c
+		$(cc) lang.c -o build/lang
 
 clean:
 		rm -r build
