@@ -9,6 +9,9 @@
         "types.h": "c",
         "lowlevel_protos.h": "c",
         "libraries.h": "c",
-        "lowlevel.h": "c"
+        "lowlevel.h": "c",
+        "custom.h": "c",
+        "startup.h": "c",
+        "alib_protos.h": "c"
     }
 }

@@ -2,16 +2,20 @@ ccbin = vc
 ccopts = -c99
 includes = -I${NDK_INC}
 libs = -lamiga -lauto
+
 mathlib = -lmsoft
 cc = $(ccbin) $(ccopts) $(includes) $(libs)
 
-all: dirs window snakey
+all: dirs engine window snakey lang startup
 
-rebuild: clean dirs snakey
+rebuild: clean all
 
 
 dirs:
 	mkdir -p build
+
+engine: dirs engine7.c
+		$(cc) $(mathlib) engine7.c -o build/engine7
 
 window: dirs window.c
 		$(cc) window.c -o build/window
@@ -21,6 +25,9 @@ snakey: dirs snakey.c
 
 lang: dirs lang.c
 		$(cc) lang.c -o build/lang
+
+startup: dirs startup.c
+		$(cc) startup.c -o build/startup
 
 clean:
 		rm -r build
