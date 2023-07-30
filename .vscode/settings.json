@@ -12,6 +12,14 @@
         "lowlevel.h": "c",
         "custom.h": "c",
         "startup.h": "c",
-        "alib_protos.h": "c"
+        "alib_protos.h": "c",
+        "dos.h": "c",
+        "dos_lib.h": "c",
+        "dosextens.h": "c",
+        "tasks.h": "c",
+        "dostags.h": "c",
+        "stdarg.h": "c",
+        "stdlib.h": "c",
+        "rdargs.h": "c"
     }
 }

@@ -9,15 +9,6 @@ void mainWindowEventLoop(struct Window* win);
 void exitWithError(char* text);
 void exitNormally();
 void closeResources();
-void testOutput();
-
-#pragma endregion
-
-
-#pragma region Constants
-
-const char* CON_RED = "\033[31m";
-const char* CON_RESET = "\033[0m";
 
 #pragma endregion
 
@@ -25,8 +16,6 @@ const char* CON_RESET = "\033[0m";
 int main(int argc, char** argv) {
     if (argc == 0) {
         printf("Started from workbench\n");
-        //struct WBStartup* wbinfo = (struct WBStartup*)argv;
-        //printf(wbinfo->sm_Process);
     } else  {
         printf("Started from cli");
     }
@@ -35,8 +24,6 @@ int main(int argc, char** argv) {
     if (mainWindow == NULL) {
         exitWithError("Fehler beim Öffnen des Fensters!");
     }
-    testOutput();
-    //TimeDelay(0, 15, 0);
 
     mainWindow->RPort->cp_x = 20;
     mainWindow->RPort->cp_y = 20;
@@ -91,22 +78,4 @@ void exitNormally() {
 
 void closeResources() {
     // libauto
-}
-
-void testOutput() {
-    // Foreground colors
-    for (int i = 0; i <= 7; i++) {
-        printf("\033[%imForeground%s\n", 30 +i, CON_RESET);
-    }
-    for (int i = 0; i <= 7; i++) {
-        printf("\033[%imForeground%s\n", 90 + i, CON_RESET);
-    }
-
-    // Background colors
-    for (int i = 0; i <= 7; i++) {
-        printf("\033[%imBackground%s\n", 40 + i, CON_RESET);
-    }
-    for (int i = 0; i <= 7; i++) {
-        printf("\033[%imBackground%s\n", 100 + i, CON_RESET);
-    }
 }

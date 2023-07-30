@@ -6,7 +6,7 @@ libs = -lamiga -lauto
 mathlib = -lmsoft
 cc = $(ccbin) $(ccopts) $(includes) $(libs)
 
-all: dirs engine window snakey lang startup
+all: dirs engine window snakey lang shellcolors startup
 
 rebuild: clean all
 
@@ -25,6 +25,9 @@ snakey: dirs snakey.c
 
 lang: dirs lang.c
 		$(cc) lang.c -o build/lang
+
+shellcolors: dirs shellcolors.c
+		$(cc) shellcolors.c -o build/shellcolors
 
 startup: dirs startup.c
 		$(cc) startup.c -o build/startup
