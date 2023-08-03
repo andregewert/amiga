@@ -20,6 +20,9 @@
         "dostags.h": "c",
         "stdarg.h": "c",
         "stdlib.h": "c",
-        "rdargs.h": "c"
+        "rdargs.h": "c",
+        "strings.h": "c",
+        "stddef.h": "c",
+        "stdbool.h": "c"
     }
 }

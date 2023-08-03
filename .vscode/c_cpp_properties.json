@@ -4,12 +4,13 @@
             "name": "Amiga",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${VBCC}/posix/include/**",
+                /*"${VBCC}/posix/include/**",*/
                 "${VBCC}/targets/m68k-amigaos/include/**",
                 "${NDK_INC}"
             ],
             "defines": [],
-            "cStandard": "c99"
+            "cStandard": "c99",
+            "compilerPath": ""
         }
     ],
     "version": 4
