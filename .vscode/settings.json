@@ -23,8 +23,11 @@
         "rdargs.h": "c",
         "strings.h": "c",
         "stddef.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "functions.h": "c"
     },
+    "C_Cpp.default.compilerPath": "",
+    "C_Cpp.intelliSenseEngineFallback": "disabled",
     "C_Cpp.default.systemIncludePath": [
         /*"${VBCC}/posix/include/**",*/
         "${VBCC}/targets/m68k-amigaos/include/**",
