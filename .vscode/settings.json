@@ -23,6 +23,9 @@
         "rdargs.h": "c",
         "strings.h": "c",
         "stddef.h": "c",
-        "stdbool.h": "c"
-    }
+        "stdbool.h": "c",
+        "functions.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "",
+    "C_Cpp.intelliSenseEngineFallback": "disabled"
 }
