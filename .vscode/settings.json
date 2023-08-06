@@ -24,5 +24,10 @@
         "strings.h": "c",
         "stddef.h": "c",
         "stdbool.h": "c"
-    }
+    },
+    "C_Cpp.default.systemIncludePath": [
+        /*"${VBCC}/posix/include/**",*/
+        "${VBCC}/targets/m68k-amigaos/include/**",
+        "${NDK_INC}"
+    ]
 }

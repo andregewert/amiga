@@ -3,10 +3,7 @@
         {
             "name": "Amiga",
             "includePath": [
-                "${workspaceFolder}/**",
-                /*"${VBCC}/posix/include/**",*/
-                "${VBCC}/targets/m68k-amigaos/include/**",
-                "${NDK_INC}"
+                "${workspaceFolder}/**"
             ],
             "defines": [],
             "cStandard": "c99",
