@@ -15,11 +15,6 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <clib/all_protos.h>
-
 #include "functions.h"
 
 int main(int argc, char** argv) {

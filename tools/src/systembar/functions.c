@@ -17,7 +17,7 @@
 
 #include "functions.h"
 
-struct Window* sbFindWindowByName(CONST STRPTR windowName) {
+struct Window* sbFindWindowByName(CONST_STRPTR windowName) {
     struct Screen* wbScreen = LockPubScreen("Workbench");
     struct Window* foundWindow = NULL;
 
@@ -78,7 +78,7 @@ BOOL sbUnhideWindow(struct Window* windowToUnhide) {
         struct Window* window = wbScreen->FirstWindow;
         while (window != NULL) {
             if (window == windowToUnhide) {
-                ShowWindow(windowToUnhide);
+                ShowWindow(windowToUnhide, NULL);
                 closed = TRUE;
                 break;
             }

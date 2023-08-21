@@ -1,5 +1,7 @@
+#include <exec/types.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <clib/all_protos.h>
 #include <workbench/startup.h>
 #include <dos/rdargs.h>
@@ -7,7 +9,7 @@
 int main(int argc, char* argv[]) {
     struct RDArgs* rdArgs;
     LONG cmdLineOptions[1];
-    CONST STRPTR cmdLineTemplate = "File/A,Names/M/A";
+    CONST_STRPTR cmdLineTemplate = "File/A,Names/M/A";
 
     if (argc == 0) {
         printf("Started from workbench\n");

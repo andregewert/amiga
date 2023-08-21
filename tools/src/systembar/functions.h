@@ -18,12 +18,14 @@
 #ifndef SYSTEMBAR_FUNCTIONS_H
 #define SYSTEMBAR_FUNCTIONS_H
 
+#include <exec/types.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <clib/all_protos.h>
 
-struct Window* sbFindWindowByName(CONST STRPTR windowName);
+struct Window* sbFindWindowByName(CONST_STRPTR windowName);
 BOOL sbCloseWindow(struct Window* windowToClose);
 BOOL sbHideWindow(struct Window* windowToHide);
 BOOL sbUnhideWindow(struct Window* windowToUnhide);
