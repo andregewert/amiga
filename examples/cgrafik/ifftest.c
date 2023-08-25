@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <clib/intuition_protos.h>
 #include <clib/dos_protos.h>
-#include <
 
 /**
  * Benötigte Funktionen:
