@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <exec/types.h>
 #define PRA_FIR0_BIT (1 << 6)
 

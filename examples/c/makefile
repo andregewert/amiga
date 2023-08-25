@@ -35,5 +35,8 @@ startup: dirs startup.c
 wbscreen: dirs wbscreen.c
 		$(cc) wbscreen.c -o build/wbscreen
 
+readdir: dirs readdir.c
+		$(cc) readdir.c -o build/readdir
+		
 clean:
 		rm -r build

@@ -1,7 +1,7 @@
-#include <exec/types.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <exec/types.h>
 #include <clib/all_protos.h>
 #include <workbench/startup.h>
 #include <dos/rdargs.h>

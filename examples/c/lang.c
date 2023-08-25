@@ -1,5 +1,7 @@
-#include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <exec/types.h>
 #include <clib/lowlevel_protos.h>
 #include <clib/dos_protos.h>
 

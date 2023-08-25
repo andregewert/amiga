@@ -24,7 +24,9 @@
         "strings.h": "c",
         "stddef.h": "c",
         "stdbool.h": "c",
-        "functions.h": "c"
-    },
-    "C_Cpp.default.compilerPath": ""
+        "functions.h": "c",
+        "memory.h": "c",
+        "drawlist_protos.h": "c",
+        "exec.h": "c"
+    }
 }
