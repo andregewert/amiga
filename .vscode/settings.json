@@ -1,5 +1,6 @@
 {
     "files.encoding": "iso88591",
+    "files.eol": "\n",
     "files.associations": {
         "stdio.h": "c",
         "all_protos.h": "c",
