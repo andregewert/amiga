@@ -23,8 +23,11 @@
 
 void closeApp();
 void openMainWindow();
+void initGadgets();
 void refreshGadgets();
-void removeGadget(struct Gadget *remove);
+void removeGadgetById(UWORD gadgetId);
+struct WindowListItem *initWindowList();
+void freeWindowList();
 
 #pragma endregion
 
@@ -34,9 +37,11 @@ struct Gadget *gadgetList = NULL;
 APTR visualInfo;
 
 struct {
-    struct Window* window;
-    struct Gadget* gadget;
-} windowListItem;
+    struct Window* Window;
+    UWORD GadgetId;
+    CONST_STRPTR ButtonLabel;
+    struct WindowListItem* nextItem;
+} WindowListItem;
 
 int main(int argc, char** argv) {
     BOOL close = FALSE;
@@ -72,7 +77,8 @@ int main(int argc, char** argv) {
             struct Gadget* pressed = msg->IAddress;
             printf("Button pressed: %d\n", pressed->GadgetID);
             if (pressed->GadgetID == 1) {
-                removeGadget(pressed->NextGadget);
+                printf("Removing gadget no 1\n");
+                removeGadgetById(2);
             }
         }
     }
@@ -84,15 +90,21 @@ int main(int argc, char** argv) {
 /**
  * Should be complete, but does not redraw the window's contents
  */
-void removeGadget(struct Gadget* remove) {
+void removeGadgetById(UWORD gadgetId) {
     if (remove == NULL) return;
     struct Gadget* current = gadgetList;
     struct Gadget *next = NULL;
     while (current->NextGadget != NULL) {
         next = current->NextGadget;
-        if (next == remove) {
+        //if (next == remove) {
+        if (next->GadgetID == gadgetId) {
+            printf("Found gadget to be removed ...\n");
             current->NextGadget = next->NextGadget;
             next->NextGadget = NULL;
+            
+            // Clear window content
+            SetRast(mainWindow->RPort, 0);
+
             RemoveGadget(mainWindow, next);
             FreeGadgets(next);
             RefreshGList(gadgetList, mainWindow, NULL, -1);
@@ -103,7 +115,20 @@ void removeGadget(struct Gadget* remove) {
     }
 }
 
-void refreshGadgets() {
+void initGadgets() {
+    // TODO Sth like refreshGadgets, but with fixed "start" button at the beginning
+    // ...
+}
+
+struct WindowListItem* initWindowList() {
+    return NULL;
+}
+
+void freeWindowList() {
+    // TODO imlementieren
+}
+
+void refreshGadgets() {hbv
     if (mainWindow == NULL) return;
 
     if (gadgetList != NULL) {
@@ -118,13 +143,22 @@ void refreshGadgets() {
         return;
     }
 
-    for (int i = 0; i < 3; i++) {
+    LONG availableWidth = pubScreen->Width;
+    availableWidth -= 110;  // Space for start button
+    int numberOfButtons = 3;
+    LONG buttonWidth = (availableWidth /numberOfButtons) -4;
+    if (buttonWidth > 100) {
+        buttonWidth = 100;
+    }
+
+    for (int i = 0; i < numberOfButtons; i++) {
         printf("Creating gadget %d\n", i);
 
         struct NewGadget newGadget;
-        newGadget.ng_LeftEdge = i *40;
-        newGadget.ng_TopEdge = pubScreen->BarHeight;
-        newGadget.ng_Width = 38;
+        newGadget.ng_LeftEdge = 110 +(i * (buttonWidth +4));
+        //newGadget.ng_TopEdge = pubScreen->BarHeight;
+        newGadget.ng_TopEdge = 1;
+        newGadget.ng_Width = buttonWidth;
         newGadget.ng_Height = pubScreen->BarHeight;
         newGadget.ng_GadgetText = "Test";
         newGadget.ng_TextAttr = pubScreen->Font;
@@ -183,7 +217,7 @@ void openMainWindow() {
         WA_Width, winWidth,
         WA_Height, winHeight,
         WA_IDCMP, IDCMP_CLOSEWINDOW | IDCMP_GADGETUP,
-        WA_Flags, WFLG_ACTIVATE | WFLG_BORDERLESS | WFLG_SMART_REFRESH | WFLG_CLOSEGADGET,
+        WA_Flags, WFLG_ACTIVATE | WFLG_BORDERLESS | WFLG_SMART_REFRESH | WFLG_CLOSEGADGET | WFLG_GIMMEZEROZERO,
         WA_Title, "SystemBar",
         TAG_DONE
     );
