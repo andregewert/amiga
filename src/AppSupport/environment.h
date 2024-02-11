@@ -13,11 +13,26 @@
 
  You should have received a copy of the GNU General Public License
  along with this program. If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 
 #ifndef APPSUPPORT_ENVIRONMENT_H
 #define APPSUPPORT_ENVIRONMENT_H
 
-// TODO
+#include <stdio.h>
+#include <string.h>
+#include <exec/types.h>
+#include <clib/dos_protos.h>
+
+/**
+ * Defines the color mode for shell output.
+ */
+typedef enum COLORMODE {
+	SHELL_NO_COLORS,
+	SHELL_FULL_COLORS,
+	SHELL_FOUR_COLORS,
+	SHELL_EIGHT_COLORS
+} COLORMODE;
+
+COLORMODE envGetColorMode();
 
 #endif
