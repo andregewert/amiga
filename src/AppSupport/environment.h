@@ -15,19 +15,9 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef SYSTEMBAR_FUNCTIONS_H
-#define SYSTEMBAR_FUNCTIONS_H
+#ifndef APPSUPPORT_ENVIRONMENT_H
+#define APPSUPPORT_ENVIRONMENT_H
 
-#include <exec/types.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <clib/all_protos.h>
-
-struct Window* sbFindWindowByName(CONST_STRPTR windowName);
-BOOL sbCloseWindow(struct Window* windowToClose);
-BOOL sbHideWindow(struct Window* windowToHide);
-BOOL sbUnhideWindow(struct Window* windowToUnhide);
+// TODO
 
 #endif

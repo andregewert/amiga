@@ -15,7 +15,7 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "functions.h"
+#include "windows.h"
 
 struct Window* sbFindWindowByName(CONST_STRPTR windowName) {
     struct Screen* wbScreen = LockPubScreen("Workbench");

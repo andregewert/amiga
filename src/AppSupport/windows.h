@@ -15,10 +15,19 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "functions.h"
+#ifndef APPSUPPORT_FUNCTIONS_H
+#define APPSUPPORT_FUNCTIONS_H
 
-int main(int argc, char** argv) {
-    printf("Hello world\n");
-    struct Window* window = sbFindWindowByName("AmigaShell");
-    sbUnhideWindow(window);
-}
+#include <exec/types.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <clib/all_protos.h>
+
+struct Window* sbFindWindowByName(CONST_STRPTR windowName);
+BOOL sbCloseWindow(struct Window* windowToClose);
+BOOL sbHideWindow(struct Window* windowToHide);
+BOOL sbUnhideWindow(struct Window* windowToUnhide);
+
+#endif
