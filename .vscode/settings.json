@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "environment.h": "c",
+        "stdio.h": "c",
+        "string.h": "c",
+        "types.h": "c"
+    },
+    "files.encoding": "iso88591",
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools"
+}

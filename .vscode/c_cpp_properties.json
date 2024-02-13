@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "AmigaCross",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${VBCC}/targets/m68k-amigaos/include/**",
+                "${NDK_INC}/**"
+            ],
+            "defines": [],
+            /*"compilerPath": "/opt/amigagcc/bin/m68k-amigaos-gcc",*/
+            "cppStandard": "c++14",
+            "intelliSenseMode": "${default}",
+            "cStandard": "c99",
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4
+}

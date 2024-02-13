@@ -27,10 +27,10 @@
  * Defines the color mode for shell output.
  */
 typedef enum COLORMODE {
-	SHELL_NO_COLORS,
-	SHELL_FULL_COLORS,
-	SHELL_FOUR_COLORS,
-	SHELL_EIGHT_COLORS
+    SHELL_NO_COLORS,
+    SHELL_FULL_COLORS,
+    SHELL_FOUR_COLORS,
+    SHELL_EIGHT_COLORS
 } COLORMODE;
 
 COLORMODE envGetColorMode();
