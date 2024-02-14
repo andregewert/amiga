@@ -17,12 +17,9 @@
 
 #include "environment.h"
 
-COLORMODE envGetColorMode() {
+COLORMODE getEnvColorMode() {
     STRPTR dummy[5];
-
     if (GetVar("shellcolors", dummy, 5, 0) > 0) {
-        printf("shellcolor: %s\n", dummy);
-
         if (strcmp(dummy, "8") == 0) {
             return SHELL_EIGHT_COLORS;
         }
@@ -34,4 +31,31 @@ COLORMODE envGetColorMode() {
         }
     }
     return SHELL_NO_COLORS;
+}
+
+STRPTR getEnvCharset() {
+    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    if (buffer != NULL) {
+        int ret = GetVar("charset", buffer, 20, 0);
+        if (ret <= 0) {
+            strcpy(buffer, APPSUPPORT_DEFAULT_CHARSET);
+        }
+    }
+    return buffer;
+}
+
+STRPTR getEnvLanguage() {
+    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    if (buffer != NULL) {
+        GetVar("language", buffer, 20, 0);
+    }
+    return buffer;
+}
+
+STRPTR getEnvLanguageName() {
+    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    if (buffer != NULL) {
+        GetVar("languagename", buffer, 20, 0);
+    }
+    return buffer;
 }

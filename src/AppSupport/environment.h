@@ -20,19 +20,26 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <exec/types.h>
+#include <clib/exec_protos.h>
 #include <clib/dos_protos.h>
+
+#define APPSUPPORT_DEFAULT_CHARSET "ISO-8859-1"
 
 /**
  * Defines the color mode for shell output.
  */
-typedef enum COLORMODE {
+typedef enum {
     SHELL_NO_COLORS,
     SHELL_FULL_COLORS,
     SHELL_FOUR_COLORS,
     SHELL_EIGHT_COLORS
 } COLORMODE;
 
-COLORMODE envGetColorMode();
+COLORMODE getEnvColorMode();
+STRPTR getEnvCharset();
+STRPTR getEnvLanguage();
+STRPTR getEnvLanguageName();
 
 #endif

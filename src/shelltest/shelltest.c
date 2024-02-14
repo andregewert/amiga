@@ -3,6 +3,13 @@
 #include "../AppSupport/environment.h"
 
 int main(int argc, char** argv) {
-	printf("Color mode: %d\n", envGetColorMode());
-	exit(EXIT_SUCCESS);
+    printf("Color mode: %d\n", getEnvColorMode());
+    STRPTR encoding = getEnvCharset();
+    if (encoding != NULL) {
+        printf("Charset: '%s'\n", encoding);
+        free(encoding);
+    } else {
+        printf("Could not read charset\n");
+    }
+    exit(EXIT_SUCCESS);
 }
