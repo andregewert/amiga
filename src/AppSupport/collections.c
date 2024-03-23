@@ -29,6 +29,7 @@ listElement* listCreateElement(void* data) {
             (listElement*)malloc(sizeof(listElement));
     if (element != NULL) {
         element->data = data;
+        element->nextElement = NULL;
     }
     return element;
 }
@@ -48,6 +49,7 @@ listElement* listAppendElement(linkedList* list, void* data) {
         }
         currentNode->nextElement = newElement;
     }
+    list->length++;
     return newElement;
 }
 
@@ -71,11 +73,7 @@ void listDispose(linkedList* list) {
     while (node != NULL) {
         dispose = node;
         node = dispose->nextElement;
-
         printf("Disposing %p\n", dispose);
-        if (dispose->data != NULL) {
-            free(dispose->data);
-        }
         dispose->data = NULL;
         dispose->nextElement = NULL;
         free(dispose);

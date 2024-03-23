@@ -20,9 +20,11 @@ int main(int argc, char** argv) {
     linkedList* list = listCreate();
     listElement* firstNode = listAppendElement(list, "Knoten 1");
     printf("Pointer is %p\n", firstNode);
+    printf("List length is: %d\n", list->length);
 
     listElement* secondNode = listAppendElement(list, "Hallo Welt");
     printf("Second pointer is %p\n", secondNode);
+    printf("List length is: %d\n", list->length);
 
     listForeach(list, &printNodeData);
 

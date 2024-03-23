@@ -15,15 +15,15 @@
  along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef APPSUPPORT_FUNCTIONS_H
-#define APPSUPPORT_FUNCTIONS_H
+#ifndef APPSUPPORT_WINDOWS_H
+#define APPSUPPORT_WINDOWS_H
 
 #include <exec/types.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <clib/all_protos.h>
+#include <clib/intuition_protos.h>
 
 struct Window* sbFindWindowByName(CONST_STRPTR windowName);
 BOOL sbCloseWindow(struct Window* windowToClose);
