@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <settings default="GPL3">
+    <LanguageOptions name="ObjectiveC">
+      <option name="fileTypeOverride" value="3" />
+    </LanguageOptions>
+  </settings>
+</component>
