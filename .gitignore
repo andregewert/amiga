@@ -61,3 +61,6 @@ build/
 .settings
 .project
 .cproject
+
+# CMake build directories
+cmake*/
