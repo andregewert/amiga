@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 André Gewert <agewert@ubergeek.de>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #ifndef APPSUPPORT_COLLECTIONS_H
 #define APPSUPPORT_COLLECTIONS_H
 
@@ -48,6 +65,12 @@ typedef struct {
  */
 typedef void(*listElementCallback)(listElement*);
 
+/**
+ * Callback function for comparing two list elements.
+ * This callback can be used for sorting linked lists.
+ */
+typedef int8_t(*listSortCompare)(listElement*, listElement*);
+
 // </editor-fold>
 
 
@@ -75,6 +98,24 @@ listElement* listCreateElement(void* data);
 listElement* listAppendElement(linkedList* list, void* data);
 
 /**
+ * Returns the element at a specific index or NULL if the requested
+ * element does not exist.
+ * @param list Pointer to the linked list.
+ * @param index Index for the requested element.
+ * @return Pointer to the requested element or NULL
+ */
+listElement* listGetElementAt(linkedList* list, uint32_t index);
+
+/**
+ * Removes an element from a linked list and returns a pointer to
+ * the removed element.
+ * @param list
+ * @param index
+ * @return
+ */
+listElement* listRemoveElementAt(linkedList* list, uint32_t index);
+
+/**
  * Calls a functions for every element of the given list.
  * @param list Pointer to the linked list structure.
  * @param iterate Pointer to a callback function.
@@ -91,7 +132,13 @@ void listDispose(linkedList* list);
 
 //struct listElement* listElementAt(struct listElement* list, uint32_t index);
 //uint32_t listSize(struct listElement* list);
-//void listSort(struct listElement* list, int (*compare)(void*, void*));
+
+/**
+ * Sorts the elements within a linked list.
+ * @param list Pointer to the linked list.
+ * @param compare Pointer to the comparison callback function.
+ */
+void listSort(linkedList* list, listSortCompare compare);
 
 // </editor-fold>
 

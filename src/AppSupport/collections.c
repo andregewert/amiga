@@ -53,6 +53,18 @@ listElement* listAppendElement(linkedList* list, void* data) {
     return newElement;
 }
 
+listElement* listGetElementAt(linkedList* list, uint32_t index) {
+    if (list == NULL || list->length <= index) {
+        return NULL;
+    }
+
+    listElement* node = list->firstElement;
+    for (uint32_t i = 0; i <= index; i++) {
+        node = node->nextElement;
+    }
+    return node;
+}
+
 void listForeach(linkedList* list, listElementCallback callback) {
     if (callback == NULL) return;
     if (list == NULL || list->firstElement == NULL) return;
@@ -80,4 +92,8 @@ void listDispose(linkedList* list) {
     }
 
     free(list);
+}
+
+void listSort(linkedList* list, listSortCompare compare) {
+    // TODO implementieren
 }
