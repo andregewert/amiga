@@ -133,6 +133,8 @@ void listDispose(linkedList* list);
 //struct listElement* listElementAt(struct listElement* list, uint32_t index);
 //uint32_t listSize(struct listElement* list);
 
+void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2);
+
 /**
  * Sorts the elements within a linked list.
  * @param list Pointer to the linked list.

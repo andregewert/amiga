@@ -59,10 +59,28 @@ listElement* listGetElementAt(linkedList* list, uint32_t index) {
     }
 
     listElement* node = list->firstElement;
-    for (uint32_t i = 0; i <= index; i++) {
+    for (uint32_t i = 0; i < index; i++) {
         node = node->nextElement;
     }
     return node;
+}
+
+listElement* listRemoveElementAt(linkedList* list, uint32_t index) {
+    if (list == NULL || list->firstElement == NULL) return NULL;
+    listElement* element = listGetElementAt(list, index);
+    if (element == NULL) return NULL;
+
+    if (index == 0) {
+        list->firstElement = element->nextElement;
+    } else {
+        listElement* previous = listGetElementAt(list, index -1);
+        if (previous != NULL) {
+            previous->nextElement = element->nextElement;
+        }
+    }
+    element->nextElement = NULL;
+    list->length--;
+    return element;
 }
 
 void listForeach(linkedList* list, listElementCallback callback) {
@@ -94,6 +112,22 @@ void listDispose(linkedList* list) {
     free(list);
 }
 
+
+void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2) {
+    if (list == NULL || list->length < 2 || i1 == i2) return;
+    // TODO
+}
+
 void listSort(linkedList* list, listSortCompare compare) {
-    // TODO implementieren
+    if (list == NULL || list->length == 0) return;
+
+    for (int i = 0; i < list->length; i++) {
+        for (int k = i +1; k < list->length; k++) {
+            if (compare(listGetElementAt(list, i), listGetElementAt(list, k)) > 0) {
+                // swap
+                printf("Swapping element %d and %d\n", i, k);
+                listSwapElementsAt(list, i, k);
+            }
+        }
+    }
 }
