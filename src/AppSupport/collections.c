@@ -103,7 +103,6 @@ void listDispose(linkedList* list) {
     while (node != NULL) {
         dispose = node;
         node = dispose->nextElement;
-        printf("Disposing %p\n", dispose);
         dispose->data = NULL;
         dispose->nextElement = NULL;
         free(dispose);
@@ -115,7 +114,42 @@ void listDispose(linkedList* list) {
 
 void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2) {
     if (list == NULL || list->length < 2 || i1 == i2) return;
-    // TODO
+
+    listElement* element1 = listGetElementAt(list, i1);
+    listElement* element2 = listGetElementAt(list, i2);
+    if (element1 == NULL || element2 == NULL) return;
+
+    listElement* element1Next = element1->nextElement;
+    listElement* element2Next = element2->nextElement;
+    listElement* element1Prev = NULL;
+    listElement* element2Prev = NULL;
+
+    if (i1 > 0) {
+        element1Prev = listGetElementAt(list, i1 -1);
+    }
+    if (i2 > 0) {
+        element2Prev = listGetElementAt(list, i2 -1);
+    }
+
+    // Moving first element
+    if (element1Prev == NULL) {
+        list->firstElement = element2;
+    } else {
+        element1Prev->nextElement = element2;
+    }
+    if (element2 == element1Next) {
+        element2->nextElement = element1;
+    } else {
+        element2->nextElement = element1Next;
+    }
+
+    // Moving second element
+    if (element2Prev == NULL) {
+        list->firstElement = element1;
+    } else {
+        element2Prev->nextElement = element1;
+    }
+    element1->nextElement = element2Next;
 }
 
 void listSort(linkedList* list, listSortCompare compare) {
@@ -124,8 +158,6 @@ void listSort(linkedList* list, listSortCompare compare) {
     for (int i = 0; i < list->length; i++) {
         for (int k = i +1; k < list->length; k++) {
             if (compare(listGetElementAt(list, i), listGetElementAt(list, k)) > 0) {
-                // swap
-                printf("Swapping element %d and %d\n", i, k);
                 listSwapElementsAt(list, i, k);
             }
         }

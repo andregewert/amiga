@@ -8,11 +8,11 @@ void printNodeData(listElement* element) {
 }
 
 int8_t compareStringNodes(listElement* e1, listElement* e2) {
-    //return strncasecmp(e1->data, e1->data, sizeof(char));
     return strcmp(e1->data, e2->data);
 }
 
-int main(int argc, char** argv) {
+void testEnvironment() {
+    printf("Testing environment functions\n");
     printf("Color mode: %d\n", getEnvColorMode());
     STRPTR encoding = getEnvCharset();
     if (encoding != NULL) {
@@ -21,8 +21,13 @@ int main(int argc, char** argv) {
     } else {
         printf("Could not read charset\n");
     }
+    printf("\n");
+}
 
+void testLinkedList() {
+    listElement* dummy;
     linkedList* list = listCreate();
+
     listElement* firstNode = listAppendElement(list, "Knoten 1");
     printf("Pointer is %p\n", firstNode);
     printf("List length is: %d\n", list->length);
@@ -31,23 +36,45 @@ int main(int argc, char** argv) {
     printf("Second pointer is %p\n", secondNode);
     printf("List length is: %d\n", list->length);
 
-    listForeach(list, &printNodeData);
-
-    printf("Node at 0: %p\n", listGetElementAt(list, 0));
-    printf("Node at 1: %p\n", listGetElementAt(list, 1));
-
-    //listSort(list, compareStringNodes);
-    printf("Remove element at index 0\n");
-    listRemoveElementAt(list, 0);
+    listElement* thirdNode = listAppendElement(list, "Aber Hallo");
+    printf("Third pointer is %p\n", thirdNode);
     printf("List length is: %d\n", list->length);
-    listForeach(list, &printNodeData);
+
+    listElement* fourthNode = listAppendElement(list, "K ... what?");
+    printf("Third pointer is %p\n", fourthNode);
+    printf("List length is: %d\n", list->length);
+
+    printf("Foreach:\n");
+    listForeach(list, printNodeData);
+
+    printf("Sorting list\n");
+    listSort(list, compareStringNodes);
+
+    printf("Foreach:\n");
+    listForeach(list, printNodeData);
 
     printf("Remove element at index 0\n");
-    listRemoveElementAt(list, 0);
+    dummy = listRemoveElementAt(list, 0);
+    dummy->data = NULL;
+    free(dummy);
     printf("List length is: %d\n", list->length);
-    listForeach(list, &printNodeData);
+    listForeach(list, printNodeData);
 
+    printf("Remove element at index 0\n");
+    dummy = listRemoveElementAt(list, 0);
+    dummy->data = NULL;
+    free(dummy);
+    printf("List length is: %d\n", list->length);
+    listForeach(list, printNodeData);
+
+    printf("Disposing list\n");
+    printf("\n");
     listDispose(list);
+}
 
+int main(int argc, char** argv) {
+    testEnvironment();
+    testLinkedList();
+    printf("Exit\n");
     exit(EXIT_SUCCESS);
 }

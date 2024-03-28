@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <exec/types.h>
 
 // <editor-fold desc="Structures">
@@ -109,9 +108,11 @@ listElement* listGetElementAt(linkedList* list, uint32_t index);
 /**
  * Removes an element from a linked list and returns a pointer to
  * the removed element.
- * @param list
- * @param index
- * @return
+ * Caution: The element is being removed from the linked list, but it's
+ * memory will not be freed. This has to be done by the caller!
+ * @param list Pointer to the linked list.
+ * @param index Index of the element to be removed.
+ * @return Pointer to the removed list element.
  */
 listElement* listRemoveElementAt(linkedList* list, uint32_t index);
 
@@ -126,17 +127,24 @@ void listForeach(linkedList* list, listElementCallback callback);
  * Disposes a linked list.
  * Note that the linked elements have to be cleaned up before
  * disposing the list.
- * @param list Pointer to the linked list stucture.
+ * @param list Pointer to the linked list structure.
  */
 void listDispose(linkedList* list);
 
-//struct listElement* listElementAt(struct listElement* list, uint32_t index);
-//uint32_t listSize(struct listElement* list);
-
+/**
+ * Swaps two elements within the given list.
+ * Current implementation is surely not the best / the fastest, so it should be improved
+ * some time.
+ * @param list Pointer to the linked list.
+ * @param i1 Index of the first element to be swapped.
+ * @param i2 Index of the second element to be swapped.
+ */
 void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2);
 
 /**
  * Sorts the elements within a linked list.
+ * Current implementation is definitely not the best solution, but for small lists it should work.
+ * @todo Implement better sorting algorithm!
  * @param list Pointer to the linked list.
  * @param compare Pointer to the comparison callback function.
  */
