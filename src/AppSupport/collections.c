@@ -17,6 +17,8 @@
 
 #include "collections.h"
 
+// <editor-fold desc="Linked lists">
+
 linkedList* listCreate() {
     linkedList* newList = (linkedList*) malloc(sizeof(linkedList));
     newList->firstElement = NULL;
@@ -111,7 +113,6 @@ void listDispose(linkedList* list) {
     free(list);
 }
 
-
 void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2) {
     if (list == NULL || list->length < 2 || i1 == i2) return;
 
@@ -163,3 +164,5 @@ void listSort(linkedList* list, listSortCompare compare) {
         }
     }
 }
+
+// </editor-fold>

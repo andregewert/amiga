@@ -15,6 +15,16 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * This module includes structures and functions for basic dynamic collections like
+ * linked lists and dictionaries. (Or at least the goal is to implement more structures
+ * than linked lists.)
+ *
+ * @todo Helper function for libraries (lists for opening / closing libraries)
+ * @todo Dictionary / hash table
+ * @todo Sorted list (like linked list, but automatically sorted)
+ */
+
 #ifndef APPSUPPORT_COLLECTIONS_H
 #define APPSUPPORT_COLLECTIONS_H
 
@@ -42,6 +52,18 @@ struct listElement {
 };
 
 /**
+ * Callback functions for linked list elements.
+ * This type is used for example by the foreach construct.
+ */
+typedef void(*listElementCallback)(listElement*);
+
+/**
+ * Callback function for comparing two list elements.
+ * This callback can be used for sorting linked lists.
+ */
+typedef int8_t(*listSortCompare)(listElement*, listElement*);
+
+/**
  * This struct describes the base of a linked list.
  * It includes the current number of linked elements and a pointer
  * to the first element (or NULL).
@@ -53,22 +75,64 @@ typedef struct {
     listElement* firstElement;
 
     /**
+     * Optional callback function to compare to list elements.
+     * Set this to automatically sort list elements when inserting them
+     * via listAddElement().
+     */
+    listSortCompare compare;
+
+    /**
      * Current number of linked elements.
      */
     uint32_t length;
 } linkedList;
 
-/**
- * Callback functions for linked list elements.
- * This type is used for example by the foreach construct.
- */
-typedef void(*listElementCallback)(listElement*);
+typedef struct {
+
+    /**
+     * Current number of elements.
+     */
+    uint32_t length;
+
+    // firstElement
+
+    // createHash
+
+} dictionary;
 
 /**
- * Callback function for comparing two list elements.
- * This callback can be used for sorting linked lists.
+ * Defines the element of a dictionary.
  */
-typedef int8_t(*listSortCompare)(listElement*, listElement*);
+typedef struct {
+
+    /**
+     * Hoping that sorting integers is faster or more efficient than
+     * sorting strings, an integer value (calculated by a simple hash function)
+     * is used for the key.
+     */
+    uint32_t hash;
+
+    /**
+     * The original string is stored, too, but it will not be used for searching
+     * and sorting.
+     */
+    STRPTR key;
+
+    /**
+     * A pointer to the actual data.
+     */
+    void* data;
+
+} dictionaryElement;
+
+/*
+ * Functions for dictionaries
+ * dictCreate()
+ * dictGet()
+ * dictSet()
+ * dictForeach()
+ * dictDispose()
+ */
 
 // </editor-fold>
 
@@ -90,6 +154,7 @@ listElement* listCreateElement(void* data);
 
 /**
  * Creates a new linked list element and appends it to the given list.
+ * @todo Refactor to listAddElement() which optionally does a sorted insert!
  * @param list Pointer to the linked list structure.
  * @param data Pointer to the element's data.
  * @return Pointer to the newly created list element.
