@@ -19,14 +19,14 @@
 
 COLORMODE getEnvColorMode() {
     STRPTR dummy[5];
-    if (GetVar("shellcolors", dummy, 5, 0) > 0) {
-        if (strcmp(dummy, "8") == 0) {
+    if (GetVar((STRPTR)"shellcolors", (STRPTR) dummy, 5, 0) > 0) {
+        if (strcmp((const char *) dummy, "8") == 0) {
             return SHELL_EIGHT_COLORS;
         }
-        if (strcmp(dummy, "4") == 0) {
+        if (strcmp((const char *) dummy, "4") == 0) {
             return SHELL_FOUR_COLORS;
         }
-        if (strcmp(dummy, "full") == 0) {
+        if (strcmp((const char *) dummy, "full") == 0) {
             return SHELL_FULL_COLORS;
         }
     }

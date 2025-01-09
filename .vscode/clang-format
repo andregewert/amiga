@@ -1,9 +1,0 @@
-# options: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
-BasedOnStyle: Google
-IndentWidth: 4
-ColumnLimit: 80
-UseTab: Never
-AllowShortIfStatementsOnASingleLine: true
-AlignTrailingComments: true
-SpacesBeforeTrailingComments: 3
-UseCRLF: false

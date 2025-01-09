@@ -7,7 +7,7 @@ void printNodeData(listElement* element) {
     printf("Data: %s\n", (char*)element->data);
 }
 
-int8_t compareStringNodes(listElement* e1, listElement* e2) {
+int compareStringNodes(listElement* e1, listElement* e2) {
     return strcmp(e1->data, e2->data);
 }
 

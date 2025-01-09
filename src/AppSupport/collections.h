@@ -61,7 +61,7 @@ typedef void(*listElementCallback)(listElement*);
  * Callback function for comparing two list elements.
  * This callback can be used for sorting linked lists.
  */
-typedef int8_t(*listSortCompare)(listElement*, listElement*);
+typedef int(*listSortCompare)(listElement*, listElement*);
 
 /**
  * This struct describes the base of a linked list.

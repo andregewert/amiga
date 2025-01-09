@@ -36,6 +36,30 @@ listElement* listCreateElement(void* data) {
     return element;
 }
 
+listElement* listAddElement(linkedList* list, const void* data) {
+    if (list == NULL) return NULL;
+
+    listElement* newElement = listCreateElement(data);
+    if (newElement == NULL) return NULL;
+
+    if (list->firstElement == NULL) {
+        list->firstElement = newElement;
+    }
+
+    // We assume the existing list contents are sorted
+    else if (list->compare != NULL) {
+        // TODO sorted insert
+    }
+
+    // List is not sorted, the new element will we appended
+    else {
+        // TODO append list element
+    }
+
+    list->length++;
+    return newElement;
+}
+
 listElement* listAppendElement(linkedList* list, void* data) {
     if (list == NULL) return NULL;
 
