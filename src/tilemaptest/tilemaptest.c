@@ -87,7 +87,7 @@ struct Tilemap* loadTileMap(STRPTR filename) {
     picture = LoadPicture(filename, TAG_DONE);
     psm = CreatePenShareMap(TAG_DONE);
 
-    tilemap->bitmap = AllocBitMap(16, 16, 8, BMF_CLEAR, screen->RastPort->BitMap);
+    //tilemap->bitmap = AllocBitMap(16, 16, 8, BMF_CLEAR, screen->RastPort->BitMap);
     tilemap->tileLength = 16;
     tilemap->countX = 20;
     tilemap->countY = 15;
