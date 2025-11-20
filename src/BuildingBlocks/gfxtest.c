@@ -108,7 +108,7 @@ void drawTest(struct Window* win) {
     Text(rastPort, "Hallo\0", 5);
     Draw(rastPort, 60, 60);
 
-    //STRPTR table[] = {"Bitstream Vera Sans", "Noto Sans", "Arial", "sans-serif", "default", NULL};
+    //STRPTR table[] = {"Bitstream Vera Serif", "serif", "default", NULL};
     APTR font = TT_OpenFont(
             TT_FontFile, (ULONG)"sys:fonts/truetype/VeraSerif.ttf",
             //TT_FamilyTable, (ULONG)table,
@@ -119,18 +119,19 @@ void drawTest(struct Window* win) {
     );
     if (font == NULL) {
         fprintf(stderr, "Could not load tt font!\n");
+    } else {
+        TT_SetFont(rastPort, font);
+        TT_SetAttrs(
+                rastPort,
+                TT_Window, (ULONG) win,
+                TAG_END
+        );
+        Move(rastPort, 40, 80);
+        SetDrMd(rastPort, JAM1);
+        TT_Text(rastPort, "Hello world!", 12);
+        TT_DoneRastPort(rastPort);
+        TT_CloseFont(font);
     }
-    TT_SetFont(rastPort, font);
-    TT_SetAttrs(
-            rastPort,
-            TT_Window, (ULONG)win,
-            TAG_END
-    );
-    Move(rastPort, 40, 80);
-    SetDrMd(rastPort, JAM1);
-    TT_Text(rastPort, "Hello world!", 12);
-    TT_DoneRastPort(rastPort);
-    TT_CloseFont(font);
 
     if (pen >= 0) {
         ReleasePen(win->WScreen->ViewPort.ColorMap, (ULONG)pen);
@@ -148,7 +149,6 @@ void guiGfxTest(struct Window* win) {
             drawhandle = ObtainDrawHandle(psm, win->RPort,
                                           win->WScreen->ViewPort.ColorMap, TAG_DONE);
         }
-        DeletePenShareMap(psm);
     } else {
         if (picture == NULL) {
             fprintf(stderr, "Could not open iff file\n");
@@ -164,6 +164,13 @@ void guiGfxTest(struct Window* win) {
         fprintf(stderr, "Could not obtain draw handle\n");
     }
 
-    DeletePicture(picture);
-    ReleaseDrawHandle(drawhandle);
+    if (psm) {
+        DeletePenShareMap(psm);
+    }
+    if (picture) {
+        DeletePicture(picture);
+    }
+    if (drawhandle) {
+        ReleaseDrawHandle(drawhandle);
+    }
 }
