@@ -21,7 +21,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/intuition.h>
-#include <proto/guigfx.h>
+#include <proto/guigfx_lib.h>
 
 void mainWindowEventLoop(struct Window* win);
 void drawTest(struct Window* win);
