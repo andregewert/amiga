@@ -279,6 +279,23 @@ void testShellColors() {
     shellPrintf(SHELL_FG_WHITE, "White (mapped to White)\n");
     shellPrintf(SHELL_FG_BLACK, "Black (mapped to Black)\n");
 
+    printf("\nTesting shell background colors (Full Colors)\n");
+    setEnvColorModeOverride(SHELL_ANSI_COLORS);
+    shellPrintf(SHELL_BG_RED, "Red background\n");
+    shellPrintf(SHELL_BG_GREEN, "Green background\n");
+    shellPrintf(SHELL_BG_BLUE, "Blue background\n");
+    shellPrintf(SHELL_BG_YELLOW, "Yellow background\n");
+    shellPrintf(SHELL_FG_BLACK SHELL_BG_WHITE, "Black on white\n");
+    shellPrintf(SHELL_FG_WHITE SHELL_BG_BLUE, "White on blue\n");
+    
+    printf("\nTesting shell background colors (Four Colors Mapping)\n");
+    setEnvColorModeOverride(SHELL_FOUR_COLORS);
+    shellPrintf(SHELL_BG_RED, "Red background (mapped to Blue?)\n");
+    shellPrintf(SHELL_BG_GREEN, "Green background (mapped to Blue?)\n");
+    shellPrintf(SHELL_BG_BLUE, "Blue background (mapped to Blue)\n");
+    shellPrintf(SHELL_BG_YELLOW, "Yellow background (mapped to White?)\n");
+    shellPrintf(SHELL_FG_BLACK SHELL_BG_WHITE, "Black on white (mapped to Black on White)\n");
+
     setEnvColorModeOverride(-1); // Reset override
     
     printf("\nNormal usage:\n");
@@ -287,8 +304,6 @@ void testShellColors() {
     shellResetColor();
     printf("Back to normal\n");
 
-    shellPrintf(SHELL_BG_RED, "Red background\n");
-    shellPrintf(SHELL_FG_WHITE SHELL_BG_BLUE, "White on blue\n");
     printf("\n");
 }
 
