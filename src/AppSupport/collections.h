@@ -17,8 +17,7 @@
 
 /**
  * This module includes structures and functions for basic dynamic collections like
- * linked lists and dictionaries. (Or at least the goal is to implement more structures
- * than linked lists.)
+ * linked lists, dictionaries, and binary search trees.
  *
  * @todo Helper function for libraries (lists for opening / closing libraries)
  */

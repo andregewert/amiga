@@ -19,14 +19,14 @@
 
 COLORMODE getEnvColorMode() {
     STRPTR dummy[5];
-    if (GetVar((STRPTR)"shellcolors", (STRPTR) dummy, 5, 0) > 0) {
-        if (strcmp((const char *) dummy, "8") == 0) {
+    if (GetVar("shellcolors", dummy, 5, 0) > 0) {
+        if (strcmp(dummy, "8") == 0) {
             return SHELL_EIGHT_COLORS;
         }
-        if (strcmp((const char *) dummy, "4") == 0) {
+        if (strcmp(dummy, "4") == 0) {
             return SHELL_FOUR_COLORS;
         }
-        if (strcmp((const char *) dummy, "full") == 0) {
+        if (strcmp(dummy, "full") == 0) {
             return SHELL_FULL_COLORS;
         }
     }
@@ -34,7 +34,7 @@ COLORMODE getEnvColorMode() {
 }
 
 STRPTR getEnvCharset() {
-    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    STRPTR buffer = calloc(20, sizeof(char));
     if (buffer != NULL) {
         int ret = GetVar("charset", buffer, 20, 0);
         if (ret <= 0) {
@@ -45,7 +45,7 @@ STRPTR getEnvCharset() {
 }
 
 STRPTR getEnvLanguage() {
-    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    STRPTR buffer = calloc(20, sizeof(char));
     if (buffer != NULL) {
         GetVar("language", buffer, 20, 0);
     }
@@ -53,7 +53,7 @@ STRPTR getEnvLanguage() {
 }
 
 STRPTR getEnvLanguageName() {
-    STRPTR buffer = (STRPTR)calloc(20, sizeof(char));
+    STRPTR buffer = calloc(20, sizeof(char));
     if (buffer != NULL) {
         GetVar("languagename", buffer, 20, 0);
     }
