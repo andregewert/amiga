@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <exec/types.h>
+#include "collections.h"
 
 /**
  * Creates a unique temporary file in the given directory.
@@ -38,5 +39,14 @@ STRPTR createTempFile(const char* directory, const char* prefix);
  * @return The full path of the created directory. The caller is responsible for freeing the memory.
  */
 STRPTR createTempDir(const char* parent_dir, const char* prefix);
+
+/**
+ * Reads an INI configuration file and creates a dictionary from it.
+ * The keys are prefixed with the section name (e.g., "Section.Key").
+ * Keys without a section are added directly.
+ * @param filename The path to the INI file.
+ * @return A pointer to a new dictionary, or NULL on error.
+ */
+dictionary* dictFromIni(const char* filename);
 
 #endif //APPSUPPORT_FILETOOLS_H

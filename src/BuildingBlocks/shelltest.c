@@ -225,6 +225,37 @@ void testBinaryTree() {
     printf("\n");
 }
 
+void testIniParser() {
+    printf("Testing INI parser\n");
+    dictionary* dict = dictFromIni("test.ini");
+    if (dict == NULL) {
+        printf("Could not read test.ini\n");
+        return;
+    }
+
+    printf("INI Dictionary length: %d\n", dict->length);
+    dictForeach(dict, printDictElement);
+
+    char* val1 = (char*)dictGet(dict, "Section1.key1");
+    printf("Section1.key1: %s\n", val1 ? val1 : "Not found");
+
+    char* val4 = (char*)dictGet(dict, "Section2.key4");
+    printf("Section2.key4: [%s]\n", val4 ? val4 : "Not found");
+
+    // Manually free duplicated values before disposing
+    listElement* current = dict->list->firstElement;
+    while (current != NULL) {
+        dictionaryElement* element = (dictionaryElement*)current->data;
+        if (element->data != NULL) {
+            free(element->data);
+        }
+        current = current->nextElement;
+    }
+
+    dictDispose(dict);
+    printf("\n");
+}
+
 int main(int argc, char** argv) {
     testEnvironment();
     testLinkedList();
@@ -232,6 +263,7 @@ int main(int argc, char** argv) {
     testDictionary();
     testFileTools();
     testBinaryTree();
+    testIniParser();
     printf("Exit\n");
     exit(EXIT_SUCCESS);
 }

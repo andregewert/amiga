@@ -118,3 +118,76 @@ STRPTR createTempDir(const char* parent_dir, const char* prefix) {
     free(dirname);
     return NULL;
 }
+
+dictionary* dictFromIni(const char* filename) {
+    if (filename == NULL) return NULL;
+
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) return NULL;
+
+    dictionary* dict = dictCreate();
+    if (dict == NULL) {
+        fclose(file);
+        return NULL;
+    }
+
+    char line[512];
+    char currentSection[128] = "";
+    while (fgets(line, sizeof(line), file)) {
+        // Remove trailing newline and spaces
+        char* end = line + strlen(line) - 1;
+        while (end >= line && (*end == '\n' || *end == '\r' || *end == ' ')) {
+            *end-- = '\0';
+        }
+
+        // Skip leading spaces
+        char* start = line;
+        while (*start == ' ') start++;
+
+        // Skip comments and empty lines
+        if (*start == '\0' || *start == ';' || *start == '#') continue;
+
+        // Check for section
+        if (*start == '[' ) {
+            char* sectionEnd = strchr(start, ']');
+            if (sectionEnd != NULL) {
+                *sectionEnd = '\0';
+                strncpy(currentSection, start + 1, sizeof(currentSection) - 1);
+                currentSection[sizeof(currentSection) - 1] = '\0';
+            }
+            continue;
+        }
+
+        // Check for key=value
+        char* equals = strchr(start, '=');
+        if (equals != NULL) {
+            *equals = '\0';
+            char* key = start;
+            char* value = equals + 1;
+
+            // Trim key
+            char* keyEnd = key + strlen(key) - 1;
+            while (keyEnd >= key && *keyEnd == ' ') *keyEnd-- = '\0';
+
+            // Trim value
+            while (*value == ' ') value++;
+            char* valueEnd = value + strlen(value) - 1;
+            while (valueEnd >= value && *valueEnd == ' ') *valueEnd-- = '\0';
+
+            char fullKey[256];
+            if (currentSection[0] != '\0') {
+                snprintf(fullKey, sizeof(fullKey), "%s.%s", currentSection, key);
+            } else {
+                strncpy(fullKey, key, sizeof(fullKey) - 1);
+                fullKey[sizeof(fullKey) - 1] = '\0';
+            }
+
+            // dictSet duplicates the key string, but uses the data pointer as-is.
+            // Since we need to store the value string, we should duplicate it.
+            dictSet(dict, (STRPTR)fullKey, (void*)strdup(value));
+        }
+    }
+
+    fclose(file);
+    return dict;
+}
