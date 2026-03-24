@@ -21,7 +21,6 @@
  * than linked lists.)
  *
  * @todo Helper function for libraries (lists for opening / closing libraries)
- * @todo Dictionary / hash table
  */
 
 #ifndef APPSUPPORT_COLLECTIONS_H
@@ -31,7 +30,7 @@
 #include <stdlib.h>
 #include <exec/types.h>
 
-// <editor-fold desc="Structures">
+// <editor-fold desc="Linked lists">
 
 typedef struct listElement listElement;
 
@@ -52,7 +51,7 @@ struct listElement {
 
 /**
  * Callback functions for linked list elements.
- * This type is used for example by the foreach construct.
+ * This type is used, for example, by the foreach construct.
  */
 typedef void(*listElementCallback)(listElement*);
 
@@ -86,9 +85,108 @@ typedef struct {
     uint32_t length;
 } linkedList;
 
+/**
+ * Creates an empty linked list.
+ * @return Pointer to the created list structure.
+ */
+linkedList* listCreate();
+
+/**
+ * Creates a new linked list element and references the given data.
+ * @param data Pointer to the element's data
+ * @return Pointer to the newly created list element struct.
+ */
+listElement* listCreateElement(void* data);
+
+/**
+ * Creates a new linked list element and adds it to the list.
+ * If list->compare is set, the element is inserted in sorted order.
+ * Otherwise, it is appended to the end of the list.
+ * @param list Pointer to the linked list.
+ * @param data Pointer to the element's data.
+ * @return Pointer to the newly created list element.
+ */
+listElement* listAddElement(linkedList* list, void* data);
+
+/**
+ * Creates a new linked list element and appends it to the given list.
+ * @param list Pointer to the linked list structure.
+ * @param data Pointer to the element's data.
+ * @return Pointer to the newly created list element.
+ */
+listElement* listAppendElement(linkedList* list, void* data);
+
+/**
+ * Returns the element at a specific index or NULL if the requested
+ * element does not exist.
+ * @param list Pointer to the linked list.
+ * @param index Index for the requested element.
+ * @return Pointer to the requested element or NULL
+ */
+listElement* listGetElementAt(linkedList* list, uint32_t index);
+
+/**
+ * Removes an element from a linked list and returns a pointer to
+ * the removed element.
+ * Caution: The element is being removed from the linked list, but its
+ * memory will not be freed. This has to be done by the caller!
+ * @param list Pointer to the linked list.
+ * @param index Index of the element to be removed.
+ * @return Pointer to the removed list element.
+ */
+listElement* listRemoveElementAt(linkedList* list, uint32_t index);
+
+/**
+ * Calls a function for every element of the given list.
+ * @param list Pointer to the linked list structure.
+ * @param callback Pointer to a callback function.
+ */
+void listForeach(linkedList* list, listElementCallback callback);
+
+/**
+ * Disposes a linked list.
+ * Note that the linked elements have to be cleaned up before
+ * disposing the list.
+ * @param list Pointer to the linked list structure.
+ */
+void listDispose(linkedList* list);
+
+/**
+ * Swaps two elements within the given list.
+ * The current implementation is surely not the best / the fastest, so it should be improved
+ * some time.
+ * @param list Pointer to the linked list.
+ * @param i1 Index of the first element to be swapped.
+ * @param i2 Index of the second element to be swapped.
+ */
+void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2);
+
+/**
+ * Sorts the elements within a linked list.
+ * The current implementation is definitely not the best solution, but for small lists it should work.
+ * @param list Pointer to the linked list.
+ * @param compare Pointer to the comparison callback function.
+ */
+void listSort(linkedList* list, listSortCompare compare);
+
+// </editor-fold>
+
+
+// <editor-fold desc="Dictionaries">
+
+/**
+ * Type for dictionary elements.
+ */
 typedef struct dictionaryElement dictionaryElement;
+
+/**
+ * Callback function type for dictionary element processing.
+ */
 typedef void(*dictElementCallback)(dictionaryElement*);
 
+/**
+ * The base structure for dictionaries.
+ */
 typedef struct {
 
     /**
@@ -165,97 +263,6 @@ void dictForeach(dictionary* dict, dictElementCallback callback);
  * @param dict Pointer to the dictionary structure.
  */
 void dictDispose(dictionary* dict);
-
-// </editor-fold>
-
-
-// <editor-fold desc="Functions">
-
-/**
- * Creates an empty linked list.
- * @return Pointer to the created list structure.
- */
-linkedList* listCreate();
-
-/**
- * Creates a new linked list element and references the given data.
- * @param data Pointer to the element's data
- * @return Pointer to the newly created list element struct.
- */
-listElement* listCreateElement(void* data);
-
-/**
- * Creates a new linked list element and adds it to the list.
- * If list->compare is set, the element is inserted in sorted order.
- * Otherwise, it is appended to the end of the list.
- * @param list Pointer to the linked list.
- * @param data Pointer to the element's data.
- * @return Pointer to the newly created list element.
- */
-listElement* listAddElement(linkedList* list, void* data);
-
-/**
- * Creates a new linked list element and appends it to the given list.
- * @todo Refactor to listAddElement() which optionally does a sorted insert!
- * @param list Pointer to the linked list structure.
- * @param data Pointer to the element's data.
- * @return Pointer to the newly created list element.
- */
-listElement* listAppendElement(linkedList* list, void* data);
-
-/**
- * Returns the element at a specific index or NULL if the requested
- * element does not exist.
- * @param list Pointer to the linked list.
- * @param index Index for the requested element.
- * @return Pointer to the requested element or NULL
- */
-listElement* listGetElementAt(linkedList* list, uint32_t index);
-
-/**
- * Removes an element from a linked list and returns a pointer to
- * the removed element.
- * Caution: The element is being removed from the linked list, but it's
- * memory will not be freed. This has to be done by the caller!
- * @param list Pointer to the linked list.
- * @param index Index of the element to be removed.
- * @return Pointer to the removed list element.
- */
-listElement* listRemoveElementAt(linkedList* list, uint32_t index);
-
-/**
- * Calls a function for every element of the given list.
- * @param list Pointer to the linked list structure.
- * @param callback Pointer to a callback function.
- */
-void listForeach(linkedList* list, listElementCallback callback);
-
-/**
- * Disposes a linked list.
- * Note that the linked elements have to be cleaned up before
- * disposing the list.
- * @param list Pointer to the linked list structure.
- */
-void listDispose(linkedList* list);
-
-/**
- * Swaps two elements within the given list.
- * Current implementation is surely not the best / the fastest, so it should be improved
- * some time.
- * @param list Pointer to the linked list.
- * @param i1 Index of the first element to be swapped.
- * @param i2 Index of the second element to be swapped.
- */
-void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2);
-
-/**
- * Sorts the elements within a linked list.
- * The current implementation is definitely not the best solution, but for small lists it should work.
- * @todo Implement better sorting algorithm!
- * @param list Pointer to the linked list.
- * @param compare Pointer to the comparison callback function.
- */
-void listSort(linkedList* list, listSortCompare compare);
 
 // </editor-fold>
 
