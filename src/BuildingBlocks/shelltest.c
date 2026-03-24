@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "../AppSupport/environment.h"
 #include "../AppSupport/collections.h"
+#include "../AppSupport/filetools.h"
 
 void printNodeData(listElement* element) {
     printf("Data: %s\n", (char*)element->data);
@@ -72,9 +73,50 @@ void testLinkedList() {
     listDispose(list);
 }
 
+void testSortedInsert() {
+    printf("Testing sorted insert\n");
+    linkedList* list = listCreate();
+    list->compare = compareStringNodes;
+
+    listAddElement(list, "C - Middle");
+    listAddElement(list, "A - First");
+    listAddElement(list, "E - Last");
+    listAddElement(list, "B - Second");
+    listAddElement(list, "D - Fourth");
+
+    printf("List length (should be 5): %d\n", list->length);
+    listForeach(list, printNodeData);
+
+    listDispose(list);
+    printf("\n");
+}
+
+void testFileTools() {
+    printf("Testing file tools\n");
+    STRPTR tempFile = createTempFile("T:", "testfile_");
+    if (tempFile != NULL) {
+        printf("Created unique temp file: %s\n", tempFile);
+        free(tempFile);
+    } else {
+        printf("Failed to create unique temp file\n");
+    }
+
+    STRPTR tempDir = createTempDir("T:", "testdir_");
+    if (tempDir != NULL) {
+        printf("Created unique temp directory: %s\n", tempDir);
+        // On AmigaOS, we'd need DeleteFile or DeleteDir, but for now let's just free the path string
+        free(tempDir);
+    } else {
+        printf("Failed to create unique temp directory\n");
+    }
+    printf("\n");
+}
+
 int main(int argc, char** argv) {
     testEnvironment();
     testLinkedList();
+    testSortedInsert();
+    testFileTools();
     printf("Exit\n");
     exit(EXIT_SUCCESS);
 }

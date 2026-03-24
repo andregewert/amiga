@@ -36,7 +36,7 @@ listElement* listCreateElement(void* data) {
     return element;
 }
 
-listElement* listAddElement(linkedList* list, const void* data) {
+listElement* listAddElement(linkedList* list, void* data) {
     if (list == NULL) return NULL;
 
     listElement* newElement = listCreateElement(data);
@@ -48,12 +48,30 @@ listElement* listAddElement(linkedList* list, const void* data) {
 
     // We assume the existing list contents are sorted
     else if (list->compare != NULL) {
-        // TODO sorted insert
+        listElement* current = list->firstElement;
+        listElement* previous = NULL;
+
+        while (current != NULL && list->compare(newElement, current) > 0) {
+            previous = current;
+            current = current->nextElement;
+        }
+
+        if (previous == NULL) {
+            newElement->nextElement = list->firstElement;
+            list->firstElement = newElement;
+        } else {
+            newElement->nextElement = current;
+            previous->nextElement = newElement;
+        }
     }
 
-    // List is not sorted, the new element will we appended
+    // List is not sorted, the new element will be appended
     else {
-        // TODO append list element
+        listElement* currentNode = list->firstElement;
+        while (currentNode->nextElement != NULL) {
+            currentNode = currentNode->nextElement;
+        }
+        currentNode->nextElement = newElement;
     }
 
     list->length++;
@@ -156,25 +174,29 @@ void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2) {
         element2Prev = listGetElementAt(list, i2 -1);
     }
 
-    // Moving first element
-    if (element1Prev == NULL) {
-        list->firstElement = element2;
-    } else {
-        element1Prev->nextElement = element2;
-    }
     if (element2 == element1Next) {
         element2->nextElement = element1;
-    } else {
+        element1->nextElement = element2Next;
+        if (element1Prev != NULL) element1Prev->nextElement = element2;
+        else list->firstElement = element2;
+        return;
+    }
+    if (element1 == element2Next) {
+        element1->nextElement = element2;
         element2->nextElement = element1Next;
+        if (element2Prev != NULL) element2Prev->nextElement = element1;
+        else list->firstElement = element1;
+        return;
     }
 
-    // Moving second element
-    if (element2Prev == NULL) {
-        list->firstElement = element1;
-    } else {
-        element2Prev->nextElement = element1;
-    }
     element1->nextElement = element2Next;
+    element2->nextElement = element1Next;
+
+    if (element1Prev != NULL) element1Prev->nextElement = element2;
+    else list->firstElement = element2;
+
+    if (element2Prev != NULL) element2Prev->nextElement = element1;
+    else list->firstElement = element1;
 }
 
 void listSort(linkedList* list, listSortCompare compare) {

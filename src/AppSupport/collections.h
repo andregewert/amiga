@@ -153,6 +153,16 @@ linkedList* listCreate();
 listElement* listCreateElement(void* data);
 
 /**
+ * Creates a new linked list element and adds it to the list.
+ * If list->compare is set, the element is inserted in sorted order.
+ * Otherwise, it is appended to the end of the list.
+ * @param list Pointer to the linked list.
+ * @param data Pointer to the element's data.
+ * @return Pointer to the newly created list element.
+ */
+listElement* listAddElement(linkedList* list, void* data);
+
+/**
  * Creates a new linked list element and appends it to the given list.
  * @todo Refactor to listAddElement() which optionally does a sorted insert!
  * @param list Pointer to the linked list structure.
