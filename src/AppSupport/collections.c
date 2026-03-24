@@ -374,3 +374,198 @@ void dictDispose(dictionary* dict) {
 }
 
 // </editor-fold>
+
+
+// <editor-fold desc="Binary Trees">
+
+binaryTree* treeCreate(treeCompare compare) {
+    if (compare == NULL) return NULL;
+    binaryTree* tree = (binaryTree*)malloc(sizeof(binaryTree));
+    if (tree != NULL) {
+        tree->root = NULL;
+        tree->compare = compare;
+        tree->length = 0;
+    }
+    return tree;
+}
+
+treeNode* treeCreateNode(void* data) {
+    treeNode* node = (treeNode*)malloc(sizeof(treeNode));
+    if (node != NULL) {
+        node->data = data;
+        node->left = NULL;
+        node->right = NULL;
+    }
+    return node;
+}
+
+static treeNode* treeInsertNode(binaryTree* tree, treeNode* root, treeNode* newNode) {
+    if (root == NULL) return newNode;
+
+    int res = tree->compare(newNode, root);
+    if (res < 0) {
+        root->left = treeInsertNode(tree, root->left, newNode);
+    } else {
+        root->right = treeInsertNode(tree, root->right, newNode);
+    }
+
+    return root;
+}
+
+treeNode* treeAddElement(binaryTree* tree, void* data) {
+    if (tree == NULL) return NULL;
+
+    treeNode* newNode = treeCreateNode(data);
+    if (newNode != NULL) {
+        tree->root = treeInsertNode(tree, tree->root, newNode);
+        tree->length++;
+    }
+    return newNode;
+}
+
+treeNode* treeFindElement(binaryTree* tree, treeNode* searchNode) {
+    if (tree == NULL || searchNode == NULL) return NULL;
+
+    treeNode* current = tree->root;
+    while (current != NULL) {
+        int res = tree->compare(searchNode, current);
+        if (res == 0) return current;
+        if (res < 0) current = current->left;
+        else current = current->right;
+    }
+
+    return NULL;
+}
+
+static treeNode* treeFindMin(treeNode* node) {
+    treeNode* current = node;
+    while (current != NULL && current->left != NULL) {
+        current = current->left;
+    }
+    return current;
+}
+
+static treeNode* treeRemoveNodeRecursive(binaryTree* tree, treeNode* root, treeNode* searchNode, int* deleted) {
+    if (root == NULL) return NULL;
+
+    int res = tree->compare(searchNode, root);
+    if (res < 0) {
+        root->left = treeRemoveNodeRecursive(tree, root->left, searchNode, deleted);
+    } else if (res > 0) {
+        root->right = treeRemoveNodeRecursive(tree, root->right, searchNode, deleted);
+    } else {
+        // Node found
+        *deleted = 1;
+        if (root->left == NULL) {
+            treeNode* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            treeNode* temp = root->left;
+            free(root);
+            return temp;
+        }
+
+        // Node with two children: Get the inorder successor (smallest in the right subtree)
+        treeNode* temp = treeFindMin(root->right);
+
+        // Copy the inorder successor's data to this node
+        root->data = temp->data;
+
+        // Delete the inorder successor
+        root->right = treeRemoveNodeRecursive(tree, root->right, temp, deleted);
+    }
+    return root;
+}
+
+void treeRemoveElement(binaryTree* tree, treeNode* searchNode) {
+    if (tree == NULL || tree->root == NULL || searchNode == NULL) return;
+    int deleted = 0;
+    tree->root = treeRemoveNodeRecursive(tree, tree->root, searchNode, &deleted);
+    if (deleted) {
+        tree->length--;
+    }
+}
+
+static void treeDisposeRecursive(treeNode* node) {
+    if (node == NULL) return;
+    treeDisposeRecursive(node->left);
+    treeDisposeRecursive(node->right);
+    node->data = NULL;
+    node->left = NULL;
+    node->right = NULL;
+    free(node);
+}
+
+static uint32_t treeCountNodes(treeNode* node) {
+    if (node == NULL) return 0;
+    return 1 + treeCountNodes(node->left) + treeCountNodes(node->right);
+}
+
+static treeNode* treeRemoveSubtreeRecursive(binaryTree* tree, treeNode* root, treeNode* searchNode, uint32_t* removed) {
+    if (root == NULL) return NULL;
+
+    int res = tree->compare(searchNode, root);
+    if (res < 0) {
+        root->left = treeRemoveSubtreeRecursive(tree, root->left, searchNode, removed);
+    } else if (res > 0) {
+        root->right = treeRemoveSubtreeRecursive(tree, root->right, searchNode, removed);
+    } else {
+        // Node found, count all nodes in this subtree
+        *removed = treeCountNodes(root);
+        treeDisposeRecursive(root);
+        return NULL;
+    }
+    return root;
+}
+
+void treeRemoveSubtree(binaryTree* tree, treeNode* searchNode) {
+    if (tree == NULL || tree->root == NULL || searchNode == NULL) return;
+    uint32_t removed = 0;
+    tree->root = treeRemoveSubtreeRecursive(tree, tree->root, searchNode, &removed);
+    tree->length -= removed;
+}
+
+static void treeInOrderRecursive(treeNode* node, treeNodeCallback callback) {
+    if (node == NULL) return;
+    treeInOrderRecursive(node->left, callback);
+    callback(node);
+    treeInOrderRecursive(node->right, callback);
+}
+
+void treeInOrder(binaryTree* tree, treeNodeCallback callback) {
+    if (tree == NULL || callback == NULL) return;
+    treeInOrderRecursive(tree->root, callback);
+}
+
+static void treePreOrderRecursive(treeNode* node, treeNodeCallback callback) {
+    if (node == NULL) return;
+    callback(node);
+    treePreOrderRecursive(node->left, callback);
+    treePreOrderRecursive(node->right, callback);
+}
+
+void treePreOrder(binaryTree* tree, treeNodeCallback callback) {
+    if (tree == NULL || callback == NULL) return;
+    treePreOrderRecursive(tree->root, callback);
+}
+
+static void treePostOrderRecursive(treeNode* node, treeNodeCallback callback) {
+    if (node == NULL) return;
+    treePostOrderRecursive(node->left, callback);
+    treePostOrderRecursive(node->right, callback);
+    callback(node);
+}
+
+void treePostOrder(binaryTree* tree, treeNodeCallback callback) {
+    if (tree == NULL || callback == NULL) return;
+    treePostOrderRecursive(tree->root, callback);
+}
+
+void treeDispose(binaryTree* tree) {
+    if (tree == NULL) return;
+    treeDisposeRecursive(tree->root);
+    free(tree);
+}
+
+// </editor-fold>

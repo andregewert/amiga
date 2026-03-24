@@ -148,12 +148,90 @@ void testFileTools() {
     printf("\n");
 }
 
+int compareTreeNodes(treeNode* n1, treeNode* n2) {
+    return strcmp((char*)n1->data, (char*)n2->data);
+}
+
+void printTreeNode(treeNode* node) {
+    printf("%s ", (char*)node->data);
+}
+
+void testBinaryTree() {
+    printf("Testing binary tree\n");
+    binaryTree* tree = treeCreate(compareTreeNodes);
+
+    treeAddElement(tree, "M");
+    treeAddElement(tree, "G");
+    treeAddElement(tree, "T");
+    treeAddElement(tree, "D");
+    treeAddElement(tree, "J");
+    treeAddElement(tree, "P");
+    treeAddElement(tree, "X");
+
+    printf("Tree length (should be 7): %d\n", tree->length);
+
+    printf("In-order traversal: ");
+    treeInOrder(tree, printTreeNode);
+    printf("\n");
+
+    printf("Pre-order traversal: ");
+    treePreOrder(tree, printTreeNode);
+    printf("\n");
+
+    printf("Post-order traversal: ");
+    treePostOrder(tree, printTreeNode);
+    printf("\n");
+
+    treeNode searchNode;
+    searchNode.data = "J";
+    treeNode* found = treeFindElement(tree, &searchNode);
+    printf("Searching for 'J': %s\n", found ? (char*)found->data : "Not found");
+
+    searchNode.data = "Z";
+    found = treeFindElement(tree, &searchNode);
+    printf("Searching for 'Z': %s\n", found ? (char*)found->data : "Not found");
+
+    printf("Removing 'M' (root with two children): ");
+    searchNode.data = "M";
+    treeRemoveElement(tree, &searchNode);
+    treeInOrder(tree, printTreeNode);
+    printf("(Length: %d)\n", tree->length);
+
+    printf("Removing 'D' (leaf node): ");
+    searchNode.data = "D";
+    treeRemoveElement(tree, &searchNode);
+    treeInOrder(tree, printTreeNode);
+    printf("(Length: %d)\n", tree->length);
+
+    printf("Removing 'G' (node with one child): ");
+    searchNode.data = "G";
+    treeRemoveElement(tree, &searchNode);
+    treeInOrder(tree, printTreeNode);
+    printf("(Length: %d)\n", tree->length);
+
+    printf("Adding nodes back for subtree removal test: ");
+    treeAddElement(tree, "G");
+    treeAddElement(tree, "D");
+    treeInOrder(tree, printTreeNode);
+    printf("(Length: %d)\n", tree->length);
+
+    printf("Removing subtree 'G' (should remove 'G' and 'D'): ");
+    searchNode.data = "G";
+    treeRemoveSubtree(tree, &searchNode);
+    treeInOrder(tree, printTreeNode);
+    printf("(Length: %d)\n", tree->length);
+
+    treeDispose(tree);
+    printf("\n");
+}
+
 int main(int argc, char** argv) {
     testEnvironment();
     testLinkedList();
     testSortedInsert();
     testDictionary();
     testFileTools();
+    testBinaryTree();
     printf("Exit\n");
     exit(EXIT_SUCCESS);
 }

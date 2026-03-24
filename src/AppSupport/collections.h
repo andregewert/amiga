@@ -275,4 +275,139 @@ void dictDispose(dictionary* dict);
 
 // </editor-fold>
 
+
+// <editor-fold desc="Binary Trees">
+
+/**
+ * Type for binary tree nodes.
+ */
+typedef struct treeNode treeNode;
+
+/**
+ * Describes a node of a binary tree.
+ */
+struct treeNode {
+    /**
+     * A pointer to the actual data.
+     */
+    void* data;
+
+    /**
+     * Pointer to the left child or NULL.
+     */
+    treeNode* left;
+
+    /**
+     * Pointer to the right child or NULL.
+     */
+    treeNode* right;
+};
+
+/**
+ * Callback function for binary tree nodes.
+ * Used for tree traversals.
+ */
+typedef void(*treeNodeCallback)(treeNode*);
+
+/**
+ * Callback function for comparing two tree nodes.
+ * Used for inserting and searching in the binary tree.
+ */
+typedef int(*treeCompare)(treeNode*, treeNode*);
+
+/**
+ * This struct describes the base of a binary tree.
+ */
+typedef struct {
+    /**
+     * Pointer to the root node or NULL.
+     */
+    treeNode* root;
+
+    /**
+     * Comparison function to maintain the tree order.
+     */
+    treeCompare compare;
+
+    /**
+     * Current number of nodes.
+     */
+    uint32_t length;
+} binaryTree;
+
+/**
+ * Creates an empty binary tree.
+ * @param compare Comparison function.
+ * @return Pointer to the created tree structure.
+ */
+binaryTree* treeCreate(treeCompare compare);
+
+/**
+ * Creates a new tree node and references the given data.
+ * @param data Pointer to the element's data.
+ * @return Pointer to the newly created tree node.
+ */
+treeNode* treeCreateNode(void* data);
+
+/**
+ * Adds a new element to the binary tree.
+ * @param tree Pointer to the binary tree.
+ * @param data Pointer to the element's data.
+ * @return Pointer to the newly created tree node.
+ */
+treeNode* treeAddElement(binaryTree* tree, void* data);
+
+/**
+ * Searches for an element in the binary tree.
+ * @param tree Pointer to the binary tree.
+ * @param searchNode A node containing the data to search for.
+ * @return Pointer to the found node or NULL.
+ */
+treeNode* treeFindElement(binaryTree* tree, treeNode* searchNode);
+
+/**
+ * Removes an element from the binary tree.
+ * Note that the data pointer in the node has to be cleaned up
+ * before unsetting the tree node if it was dynamically allocated.
+ * @param tree Pointer to the binary tree.
+ * @param searchNode A node containing the data to search and remove.
+ */
+void treeRemoveElement(binaryTree* tree, treeNode* searchNode);
+
+/**
+ * Removes a tree node along with all of its child nodes.
+ * @param tree Pointer to the binary tree.
+ * @param searchNode A node containing the data to search and remove.
+ */
+void treeRemoveSubtree(binaryTree* tree, treeNode* searchNode);
+
+/**
+ * Traverses the tree in-order and calls the callback for each node.
+ * @param tree Pointer to the binary tree.
+ * @param callback Pointer to the callback function.
+ */
+void treeInOrder(binaryTree* tree, treeNodeCallback callback);
+
+/**
+ * Traverses the tree pre-order and calls the callback for each node.
+ * @param tree Pointer to the binary tree.
+ * @param callback Pointer to the callback function.
+ */
+void treePreOrder(binaryTree* tree, treeNodeCallback callback);
+
+/**
+ * Traverses the tree post-order and calls the callback for each node.
+ * @param tree Pointer to the binary tree.
+ * @param callback Pointer to the callback function.
+ */
+void treePostOrder(binaryTree* tree, treeNodeCallback callback);
+
+/**
+ * Disposes the binary tree and its internal nodes.
+ * @param tree Pointer to the binary tree.
+ */
+void treeDispose(binaryTree* tree);
+
+// </editor-fold>
+
 #endif
