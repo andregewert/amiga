@@ -16,18 +16,35 @@
  */
 
 #include "environment.h"
+#include <string.h>
+
+/**
+ * For testing purposes, we can override the color mode.
+ */
+static int colorModeOverride = -1;
+
+void setEnvColorModeOverride(int mode) {
+    colorModeOverride = mode;
+}
 
 COLORMODE getEnvColorMode() {
-    STRPTR dummy[5];
-    if (GetVar("shellcolors", dummy, 5, 0) > 0) {
-        if (strcmp(dummy, "8") == 0) {
-            return SHELL_EIGHT_COLORS;
-        }
+    if (colorModeOverride != -1) {
+        return (COLORMODE)colorModeOverride;
+    }
+
+    char dummy[5];
+    if (GetVar("shellcolors", (STRPTR)dummy, 5, 0) > 0) {
         if (strcmp(dummy, "4") == 0) {
             return SHELL_FOUR_COLORS;
         }
+        if (strcmp(dummy, "amiga") == 0) {
+            return SHELL_FOUR_COLORS;
+        }
+        if (strcmp(dummy, "ansi") == 0) {
+            return SHELL_ANSI_COLORS;
+        }
         if (strcmp(dummy, "full") == 0) {
-            return SHELL_FULL_COLORS;
+            return SHELL_ANSI_COLORS;
         }
     }
     return SHELL_NO_COLORS;

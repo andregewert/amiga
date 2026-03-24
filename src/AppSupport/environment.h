@@ -39,22 +39,24 @@ typedef enum {
     /**
      * Color usage is not limited.
      */
-    SHELL_FULL_COLORS,
+    SHELL_ANSI_COLORS,
 
     /**
      * The application should use the four standard workbench
      * colors. These are typically grey, white, black and blue.
      */
-    SHELL_FOUR_COLORS,
-
-    /**
-     * Application is limited to a eight color palette.
-     */
-    SHELL_EIGHT_COLORS
+    SHELL_FOUR_COLORS
 
 } COLORMODE;
 
 COLORMODE getEnvColorMode();
+
+/**
+ * For testing purposes, we can override the color mode.
+ * @param mode The color mode to override with (-1 to disable).
+ */
+void setEnvColorModeOverride(int mode);
+
 STRPTR getEnvCharset();
 STRPTR getEnvLanguage();
 STRPTR getEnvLanguageName();

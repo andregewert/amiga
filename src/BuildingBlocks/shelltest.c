@@ -3,6 +3,7 @@
 #include "../AppSupport/environment.h"
 #include "../AppSupport/collections.h"
 #include "../AppSupport/filetools.h"
+#include "../AppSupport/shell.h"
 
 void printNodeData(listElement* element) {
     printf("Data: %s\n", (char*)element->data);
@@ -256,6 +257,41 @@ void testIniParser() {
     printf("\n");
 }
 
+void testShellColors() {
+    printf("Testing shell colors (Full Colors)\n");
+    setEnvColorModeOverride(SHELL_ANSI_COLORS);
+    shellPrintf(SHELL_FG_RED, "This is red text\n");
+    shellPrintf(SHELL_FG_GREEN, "This is green text\n");
+    shellPrintf(SHELL_FG_BLUE, "This is blue text\n");
+    shellPrintf(SHELL_FG_YELLOW, "This is yellow text\n");
+    shellPrintf(SHELL_FG_CYAN, "This is cyan text\n");
+    shellPrintf(SHELL_FG_MAGENTA, "This is magenta text\n");
+    shellPrintf(SHELL_FG_WHITE, "This is white text\n");
+    
+    printf("\nTesting shell colors (Four Colors Mapping)\n");
+    setEnvColorModeOverride(SHELL_FOUR_COLORS);
+    shellPrintf(SHELL_FG_RED, "Red (mapped to Blue?)\n");
+    shellPrintf(SHELL_FG_GREEN, "Green (mapped to Blue?)\n");
+    shellPrintf(SHELL_FG_BLUE, "Blue (mapped to Blue)\n");
+    shellPrintf(SHELL_FG_YELLOW, "Yellow (mapped to White?)\n");
+    shellPrintf(SHELL_FG_CYAN, "Cyan (mapped to White?)\n");
+    shellPrintf(SHELL_FG_MAGENTA, "Magenta (mapped to Blue?)\n");
+    shellPrintf(SHELL_FG_WHITE, "White (mapped to White)\n");
+    shellPrintf(SHELL_FG_BLACK, "Black (mapped to Black)\n");
+
+    setEnvColorModeOverride(-1); // Reset override
+    
+    printf("\nNormal usage:\n");
+    shellSetColor(SHELL_FG_YELLOW);
+    printf("This should be yellow (if env supports it)\n");
+    shellResetColor();
+    printf("Back to normal\n");
+
+    shellPrintf(SHELL_BG_RED, "Red background\n");
+    shellPrintf(SHELL_FG_WHITE SHELL_BG_BLUE, "White on blue\n");
+    printf("\n");
+}
+
 int main(int argc, char** argv) {
     testEnvironment();
     testLinkedList();
@@ -264,6 +300,7 @@ int main(int argc, char** argv) {
     testFileTools();
     testBinaryTree();
     testIniParser();
+    testShellColors();
     printf("Exit\n");
     exit(EXIT_SUCCESS);
 }
