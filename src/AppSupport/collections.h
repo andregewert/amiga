@@ -22,7 +22,6 @@
  *
  * @todo Helper function for libraries (lists for opening / closing libraries)
  * @todo Dictionary / hash table
- * @todo Sorted list (like linked list, but automatically sorted)
  */
 
 #ifndef APPSUPPORT_COLLECTIONS_H
@@ -87,23 +86,27 @@ typedef struct {
     uint32_t length;
 } linkedList;
 
+typedef struct dictionaryElement dictionaryElement;
+typedef void(*dictElementCallback)(dictionaryElement*);
+
 typedef struct {
+
+    /**
+     * Pointer to the internal linked list.
+     */
+    linkedList* list;
 
     /**
      * Current number of elements.
      */
     uint32_t length;
 
-    // firstElement
-
-    // createHash
-
 } dictionary;
 
 /**
  * Defines the element of a dictionary.
  */
-typedef struct {
+struct dictionaryElement {
 
     /**
      * Hoping that sorting integers is faster or more efficient than
@@ -123,16 +126,45 @@ typedef struct {
      */
     void* data;
 
-} dictionaryElement;
+};
 
-/*
- * Functions for dictionaries
- * dictCreate()
- * dictGet()
- * dictSet()
- * dictForeach()
- * dictDispose()
+/**
+ * Creates an empty dictionary.
+ * @return Pointer to the created dictionary structure.
  */
+dictionary* dictCreate();
+
+/**
+ * Adds or updates an element in the dictionary.
+ * @param dict Pointer to the dictionary.
+ * @param key The key for the element.
+ * @param data Pointer to the element's data.
+ */
+void dictSet(dictionary* dict, STRPTR key, void* data);
+
+/**
+ * Returns the data associated with the given key or NULL if the key
+ * does not exist in the dictionary.
+ * @param dict Pointer to the dictionary.
+ * @param key The key for the requested element.
+ * @return Pointer to the requested data or NULL.
+ */
+void* dictGet(dictionary* dict, STRPTR key);
+
+/**
+ * Calls a function for every element of the given dictionary.
+ * @param dict Pointer to the dictionary structure.
+ * @param callback Pointer to a callback function.
+ */
+void dictForeach(dictionary* dict, dictElementCallback callback);
+
+/**
+ * Disposes a dictionary and its internal structures.
+ * Note that the data pointers in the elements have to be cleaned up
+ * before disposing the dictionary if they were dynamically allocated.
+ * @param dict Pointer to the dictionary structure.
+ */
+void dictDispose(dictionary* dict);
 
 // </editor-fold>
 
@@ -192,9 +224,9 @@ listElement* listGetElementAt(linkedList* list, uint32_t index);
 listElement* listRemoveElementAt(linkedList* list, uint32_t index);
 
 /**
- * Calls a functions for every element of the given list.
+ * Calls a function for every element of the given list.
  * @param list Pointer to the linked list structure.
- * @param iterate Pointer to a callback function.
+ * @param callback Pointer to a callback function.
  */
 void listForeach(linkedList* list, listElementCallback callback);
 
@@ -218,7 +250,7 @@ void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2);
 
 /**
  * Sorts the elements within a linked list.
- * Current implementation is definitely not the best solution, but for small lists it should work.
+ * The current implementation is definitely not the best solution, but for small lists it should work.
  * @todo Implement better sorting algorithm!
  * @param list Pointer to the linked list.
  * @param compare Pointer to the comparison callback function.

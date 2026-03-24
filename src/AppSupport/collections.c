@@ -16,6 +16,7 @@
  */
 
 #include "collections.h"
+#include <string.h>
 
 // <editor-fold desc="Linked lists">
 
@@ -209,6 +210,129 @@ void listSort(linkedList* list, listSortCompare compare) {
             }
         }
     }
+}
+
+// </editor-fold>
+
+// <editor-fold desc="Dictionaries">
+
+/**
+ * Simple hash function for strings (DJB2)
+ * @param str The string to hash.
+ * @return The calculated hash.
+ */
+static uint32_t calculateHash(const char* str) {
+    uint32_t hash = 5381;
+    int c;
+
+    while ((c = *str++)) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
+    return hash;
+}
+
+/**
+ * Comparison function for dictionary elements based on hash.
+ * Used for sorted insert into the internal linked list.
+ * @param e1 First element.
+ * @param e2 Second element.
+ * @return Comparison result.
+ */
+static int dictCompareElements(listElement* e1, listElement* e2) {
+    dictionaryElement* d1 = (dictionaryElement*)e1->data;
+    dictionaryElement* d2 = (dictionaryElement*)e2->data;
+    if (d1->hash < d2->hash) return -1;
+    if (d1->hash > d2->hash) return 1;
+    return 0;
+}
+
+dictionary* dictCreate() {
+    dictionary* dict = (dictionary*)malloc(sizeof(dictionary));
+    if (dict != NULL) {
+        dict->list = listCreate();
+        if (dict->list != NULL) {
+            dict->list->compare = dictCompareElements;
+        }
+        dict->length = 0;
+    }
+    return dict;
+}
+
+void dictSet(dictionary* dict, STRPTR key, void* data) {
+    if (dict == NULL || dict->list == NULL || key == NULL) return;
+
+    uint32_t hash = calculateHash((const char*)key);
+
+    // Check if key already exists
+    listElement* current = dict->list->firstElement;
+    while (current != NULL) {
+        dictionaryElement* element = (dictionaryElement*)current->data;
+        if (element->hash == hash && strcmp((const char*)element->key, (const char*)key) == 0) {
+            // Update existing element
+            element->data = data;
+            return;
+        }
+        // Since the list is sorted by hash, we can stop if we've passed the hash
+        if (element->hash > hash) break;
+        current = current->nextElement;
+    }
+
+    // Key doesn't exist, create new element
+    dictionaryElement* newElement = (dictionaryElement*)malloc(sizeof(dictionaryElement));
+    if (newElement != NULL) {
+        newElement->hash = hash;
+        newElement->key = (STRPTR)strdup((const char*)key);
+        newElement->data = data;
+        listAddElement(dict->list, newElement);
+        dict->length++;
+    }
+}
+
+void* dictGet(dictionary* dict, STRPTR key) {
+    if (dict == NULL || dict->list == NULL || key == NULL) return NULL;
+
+    uint32_t hash = calculateHash((const char*)key);
+
+    listElement* current = dict->list->firstElement;
+    while (current != NULL) {
+        dictionaryElement* element = (dictionaryElement*)current->data;
+        if (element->hash == hash && strcmp((const char*)element->key, (const char*)key) == 0) {
+            return element->data;
+        }
+        if (element->hash > hash) break;
+        current = current->nextElement;
+    }
+
+    return NULL;
+}
+
+void dictForeach(dictionary* dict, dictElementCallback callback) {
+    if (dict == NULL || dict->list == NULL || callback == NULL) return;
+
+    listElement* current = dict->list->firstElement;
+    while (current != NULL) {
+        callback((dictionaryElement*)current->data);
+        current = current->nextElement;
+    }
+}
+
+void dictDispose(dictionary* dict) {
+    if (dict == NULL) return;
+
+    if (dict->list != NULL) {
+        listElement* current = dict->list->firstElement;
+        while (current != NULL) {
+            dictionaryElement* element = (dictionaryElement*)current->data;
+            if (element->key != NULL) {
+                free(element->key);
+            }
+            free(element);
+            current = current->nextElement;
+        }
+        listDispose(dict->list);
+    }
+    free(dict);
 }
 
 // </editor-fold>

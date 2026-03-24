@@ -91,6 +91,37 @@ void testSortedInsert() {
     printf("\n");
 }
 
+void printDictElement(dictionaryElement* element) {
+    printf("Key: %s, Value: %s (Hash: %u)\n", (char*)element->key, (char*)element->data, element->hash);
+}
+
+void testDictionary() {
+    printf("Testing dictionary\n");
+    dictionary* dict = dictCreate();
+
+    dictSet(dict, "Name", "André");
+    dictSet(dict, "Location", "Germany");
+    dictSet(dict, "Project", "Amiga Collections");
+    dictSet(dict, "Status", "Working");
+
+    printf("Dictionary length: %d\n", dict->length);
+    printf("Foreach:\n");
+    dictForeach(dict, printDictElement);
+
+    char* name = (char*)dictGet(dict, "Name");
+    printf("Get Name: %s\n", name ? name : "Not found");
+
+    char* unknown = (char*)dictGet(dict, "Unknown");
+    printf("Get Unknown: %s\n", unknown ? unknown : "Not found");
+
+    printf("Updating Name\n");
+    dictSet(dict, "Name", "André Gewert");
+    printf("Get Name: %s\n", (char*)dictGet(dict, "Name"));
+
+    dictDispose(dict);
+    printf("\n");
+}
+
 void testFileTools() {
     printf("Testing file tools\n");
     STRPTR tempFile = createTempFile("T:", "testfile_");
@@ -116,6 +147,7 @@ int main(int argc, char** argv) {
     testEnvironment();
     testLinkedList();
     testSortedInsert();
+    testDictionary();
     testFileTools();
     printf("Exit\n");
     exit(EXIT_SUCCESS);
