@@ -118,6 +118,11 @@ void testDictionary() {
     dictSet(dict, "Name", "André Gewert");
     printf("Get Name: %s\n", (char*)dictGet(dict, "Name"));
 
+    printf("Unsetting Location\n");
+    dictUnset(dict, "Location");
+    printf("Get Location: %s\n", (char*)dictGet(dict, "Location") ? (char*)dictGet(dict, "Location") : "Not found");
+    printf("Dictionary length: %d\n", dict->length);
+
     dictDispose(dict);
     printf("\n");
 }

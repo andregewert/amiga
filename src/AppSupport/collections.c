@@ -308,6 +308,43 @@ void* dictGet(dictionary* dict, STRPTR key) {
     return NULL;
 }
 
+void dictUnset(dictionary* dict, STRPTR key) {
+    if (dict == NULL || dict->list == NULL || key == NULL) return;
+
+    uint32_t hash = calculateHash((const char*)key);
+
+    listElement* current = dict->list->firstElement;
+    listElement* previous = NULL;
+    while (current != NULL) {
+        dictionaryElement* element = (dictionaryElement*)current->data;
+        if (element->hash == hash && strcmp((const char*)element->key, (const char*)key) == 0) {
+            // Found it, remove from list
+            if (previous == NULL) {
+                dict->list->firstElement = current->nextElement;
+            } else {
+                previous->nextElement = current->nextElement;
+            }
+            dict->list->length--;
+            dict->length--;
+
+            // Free dictionary element data
+            if (element->key != NULL) {
+                free(element->key);
+            }
+            free(element);
+
+            // Free the list element itself
+            current->data = NULL;
+            current->nextElement = NULL;
+            free(current);
+            return;
+        }
+        if (element->hash > hash) break;
+        previous = current;
+        current = current->nextElement;
+    }
+}
+
 void dictForeach(dictionary* dict, dictElementCallback callback) {
     if (dict == NULL || dict->list == NULL || callback == NULL) return;
 

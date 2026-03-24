@@ -250,6 +250,15 @@ void dictSet(dictionary* dict, STRPTR key, void* data);
 void* dictGet(dictionary* dict, STRPTR key);
 
 /**
+ * Removes an element from the dictionary.
+ * Note that the data pointer in the element has to be cleaned up
+ * before unsetting the dictionary entry if it was dynamically allocated.
+ * @param dict Pointer to the dictionary.
+ * @param key The key of the element to be removed.
+ */
+void dictUnset(dictionary* dict, STRPTR key);
+
+/**
  * Calls a function for every element of the given dictionary.
  * @param dict Pointer to the dictionary structure.
  * @param callback Pointer to a callback function.
