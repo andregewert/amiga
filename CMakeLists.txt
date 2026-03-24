@@ -10,6 +10,7 @@ include_directories("${SQLITEPATH}/include" ${TTLIBPATH})
 add_compile_options(-m68020 -mcrt=clib2)
 
 add_executable(shelltest src/BuildingBlocks/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c)
+add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c)
 add_executable(gfxtest src/BuildingBlocks/gfxtest.c)
 add_executable(tilemaptest src/BuildingBlocks/tilemaptest.c)
 add_executable(sqlitetest src/BuildingBlocks/sqlitetest.c)
