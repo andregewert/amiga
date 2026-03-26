@@ -7,7 +7,7 @@ set(TTLIBPATH /home/agewert/Dev/AmigaLibs/ttengine-7.2/Developer/include)
 set(AMISSLPATH /home/agewert/Dev/AmigaLibs/AmiSSL/Developer)
 
 link_directories("${SQLITEPATH}/lib" "${AMISSLPATH}/lib/AmigaOS3" "/opt/amigagcc/m68k-amigaos/libnix/lib/")
-include_directories("${SQLITEPATH}/include" "${AMISSLPATH}/include" ${TTLIBPATH})
+include_directories("${SQLITEPATH}/include" "${AMISSLPATH}/include" ${TTLIBPATH} src)
 add_compile_options(-m68020 -mcrt=clib2)
 
 add_executable(shelltest src/BuildingBlocks/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c src/AppSupport/shell.c src/AppSupport/network.c)
@@ -18,6 +18,7 @@ add_executable(cldir src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSuppor
 add_executable(gfxtest src/BuildingBlocks/gfxtest.c)
 add_executable(tilemaptest src/BuildingBlocks/tilemaptest.c)
 add_executable(sqlitetest src/BuildingBlocks/sqlitetest.c)
+add_executable(archivetest src/AppSupport/archive.c src/BuildingBlocks/archivetest.c src/AppSupport/collections.c)
 add_executable(Clock src/muitest/Clock.c)
 
 target_link_libraries(sqlitetest PRIVATE libsqlite3.a)
