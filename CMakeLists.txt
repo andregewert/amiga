@@ -14,6 +14,7 @@ add_executable(shelltest src/BuildingBlocks/shelltest.c src/AppSupport/environme
 add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c src/AppSupport/network.c)
 add_executable(fetchtest src/BuildingBlocks/fetchtest.c src/AppSupport/network.c src/AppSupport/collections.c src/AppSupport/environment.c src/AppSupport/shell.c)
 add_executable(fetch src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c)
+add_executable(cldir src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSupport/environment.c)
 add_executable(gfxtest src/BuildingBlocks/gfxtest.c)
 add_executable(tilemaptest src/BuildingBlocks/tilemaptest.c)
 add_executable(sqlitetest src/BuildingBlocks/sqlitetest.c)
