@@ -32,7 +32,7 @@ static const char* mapFourColors(const char* color) {
     // Black mapping
     if (strcmp(color, SHELL_FG_BLACK) == 0 || strcmp(color, SHELL_FG_BRIGHT_BLACK) == 0 ||
         strcmp(color, SHELL_BG_BLACK) == 0 || strcmp(color, SHELL_BG_BRIGHT_BLACK) == 0) {
-        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_BLACK : SHELL_BG_BLACK;
+        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_RED : SHELL_BG_RED;
     }
 
     // White mapping
@@ -42,7 +42,7 @@ static const char* mapFourColors(const char* color) {
         strcmp(color, SHELL_BG_YELLOW) == 0 || strcmp(color, SHELL_BG_BRIGHT_YELLOW) == 0 ||
         strcmp(color, SHELL_FG_CYAN) == 0 || strcmp(color, SHELL_FG_BRIGHT_CYAN) == 0 ||
         strcmp(color, SHELL_BG_CYAN) == 0 || strcmp(color, SHELL_BG_BRIGHT_CYAN) == 0) {
-        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_WHITE : SHELL_BG_WHITE;
+        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_GREEN : SHELL_BG_GREEN;
     }
 
     // Blue mapping
@@ -54,7 +54,7 @@ static const char* mapFourColors(const char* color) {
         strcmp(color, SHELL_BG_MAGENTA) == 0 || strcmp(color, SHELL_BG_BRIGHT_MAGENTA) == 0 ||
         strcmp(color, SHELL_FG_GREEN) == 0 || strcmp(color, SHELL_FG_BRIGHT_GREEN) == 0 ||
         strcmp(color, SHELL_BG_GREEN) == 0 || strcmp(color, SHELL_BG_BRIGHT_GREEN) == 0) {
-        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_BLUE : SHELL_BG_BLUE;
+        return (color[2] == '3' || color[2] == '9') ? SHELL_FG_YELLOW : SHELL_BG_YELLOW;
     }
 
     return color; // Fallback
