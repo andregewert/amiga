@@ -88,10 +88,18 @@ int main() {
     printf("Extracting file2.txt to T:extracted_file2.txt...\n");
     ASSERT_TRUE(archiveExtractFile(arch, "file2.txt", "T:extracted_file2.txt"));
 
-    printf("Testing replacement: updating file1.txt in archive...\n");
+    printf("Testing existence check...\n");
+    ASSERT_TRUE(archiveFileExists(arch, "file1.txt"));
+    ASSERT_TRUE(archiveFileExists(arch, "file2.txt"));
+    ASSERT_FALSE(archiveFileExists(arch, "nonexistent.txt"));
+
+    printf("Testing replacement prevention: adding file1.txt again should fail...\n");
+    ASSERT_FALSE(archiveAddFile(arch, file1, "file1.txt"));
+
+    printf("Testing replacement: updating file1.txt in archive using archiveReplaceFile...\n");
     const char* file1_new_content = "This is the NEW content for file 1, it is much longer than before.";
     createDummyFile(file1, file1_new_content);
-    ASSERT_TRUE(archiveAddFile(arch, file1, "file1.txt"));
+    ASSERT_TRUE(archiveReplaceFile(arch, file1, "file1.txt"));
 
     linkedList* new_toc = archiveGetTOC(arch);
     uint32_t count = 0;

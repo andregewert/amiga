@@ -58,13 +58,31 @@ void archiveClose(Archive* archive);
 
 /**
  * Adds a file to the archive. If a file with the same entry name already exists, 
- * it will be replaced by the new file.
+ * it will return FALSE.
  * @param archive The archive handle.
  * @param sourcePath The path to the source file to add.
  * @param entryName The name the file should have in the archive.
- * @return TRUE if successful, FALSE otherwise.
+ * @return TRUE if successful, FALSE otherwise (e.g. if file already exists).
  */
 BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryName);
+
+/**
+ * Replaces an existing file in the archive with a new one. 
+ * If the entry does not exist, it will be added.
+ * @param archive The archive handle.
+ * @param sourcePath The path to the source file.
+ * @param entryName The name of the file to replace in the archive.
+ * @return TRUE if successful, FALSE otherwise.
+ */
+BOOL archiveReplaceFile(Archive* archive, const char* sourcePath, const char* entryName);
+
+/**
+ * Checks if a file exists in the archive.
+ * @param archive The archive handle.
+ * @param entryName The name of the file to check.
+ * @return TRUE if it exists, FALSE otherwise.
+ */
+BOOL archiveFileExists(Archive* archive, const char* entryName);
 
 /**
  * Returns the Table of Contents (TOC) of the archive.

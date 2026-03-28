@@ -71,8 +71,26 @@ void archiveClose(Archive* archive) {
     free(archive);
 }
 
-BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryName) {
+static ArchiveEntry* findEntry(Archive* archive, const char* entryName) {
+    if (!archive || !archive->entries) return NULL;
+    listElement* current = archive->entries->firstElement;
+    while (current) {
+        ArchiveEntry* entry = (ArchiveEntry*)current->data;
+        if (entry && strcmp(entry->fileName, entryName) == 0) return entry;
+        current = current->nextElement;
+    }
+    return NULL;
+}
+
+BOOL archiveFileExists(Archive* archive, const char* entryName) {
+    return findEntry(archive, entryName) != NULL;
+}
+
+static BOOL archiveAddOrReplaceFile(Archive* archive, const char* sourcePath, const char* entryName, BOOL replace) {
     if (!archive || !sourcePath || !entryName) return FALSE;
+
+    ArchiveEntry* existing = findEntry(archive, entryName);
+    if (existing && !replace) return FALSE;
 
     BPTR src = Open((STRPTR)sourcePath, MODE_OLDFILE);
     if (!src) return FALSE;
@@ -100,7 +118,7 @@ BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryN
 
     while (remaining > 0) {
         uint32_t toRead = remaining > sizeof(buffer) ? sizeof(buffer) : remaining;
-        if (Read(src, buffer, toRead) != toRead) {
+        if (Read(src, buffer, toRead) != (LONG)toRead) {
             success = FALSE;
             break;
         }
@@ -118,7 +136,6 @@ BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryN
     }
 
     // Create or update entry
-    ArchiveEntry* existing = findEntry(archive, entryName);
     if (existing) {
         existing->size = size;
         existing->offset = archive->tocOffset;
@@ -159,19 +176,16 @@ BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryN
     return TRUE;
 }
 
-linkedList* archiveGetTOC(Archive* archive) {
-    return archive ? archive->entries : NULL;
+BOOL archiveAddFile(Archive* archive, const char* sourcePath, const char* entryName) {
+    return archiveAddOrReplaceFile(archive, sourcePath, entryName, FALSE);
 }
 
-static ArchiveEntry* findEntry(Archive* archive, const char* entryName) {
-    if (!archive || !archive->entries) return NULL;
-    listElement* current = archive->entries->firstElement;
-    while (current) {
-        ArchiveEntry* entry = (ArchiveEntry*)current->data;
-        if (entry && strcmp(entry->fileName, entryName) == 0) return entry;
-        current = current->nextElement;
-    }
-    return NULL;
+BOOL archiveReplaceFile(Archive* archive, const char* sourcePath, const char* entryName) {
+    return archiveAddOrReplaceFile(archive, sourcePath, entryName, TRUE);
+}
+
+linkedList* archiveGetTOC(Archive* archive) {
+    return archive ? archive->entries : NULL;
 }
 
 void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize) {
