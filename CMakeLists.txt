@@ -14,6 +14,7 @@ add_compile_options(-m68020 -mcrt=clib2)
 add_executable(fetch src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c)
 add_executable(cldir src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSupport/environment.c)
 add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c src/AppSupport/network.c)
+add_executable(img2ascii src/Shelltools/img2ascii.c src/AppSupport/image.c src/AppSupport/shell.c src/AppSupport/environment.c)
 
 # Tests
 add_executable(archivetest src/AppSupport/archive.c src/AppSupportTests/archivetest.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c)

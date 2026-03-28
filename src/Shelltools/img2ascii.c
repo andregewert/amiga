@@ -1,0 +1,50 @@
+// Copyright (c) 2026 André Gewert <agewert@ubergeek.de>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+#include "AppSupport/image.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <proto/dos.h>
+#include <dos/dos.h>
+
+int main(int argc, char* argv[]) {
+    STRPTR template = (STRPTR)"FILE/A,WIDTH/N";
+    struct {
+        char* file;
+        LONG* width;
+    } args = {NULL, NULL};
+
+    struct RDArgs* rdargs = ReadArgs(template, (intptr_t*)&args, NULL);
+    if (!rdargs) {
+        PrintFault(IoErr(), (STRPTR)"img2ascii");
+        return EXIT_FAILURE;
+    }
+
+    const char* filename = args.file;
+    uint32_t width = 80;
+
+    if (args.width) {
+        width = (uint32_t)*args.width;
+    }
+
+    if (!imagePrintAscii(filename, width)) {
+        fprintf(stderr, "Failed to convert image to ASCII.\n");
+        FreeArgs(rdargs);
+        return EXIT_FAILURE;
+    }
+
+    FreeArgs(rdargs);
+    return EXIT_SUCCESS;
+}
