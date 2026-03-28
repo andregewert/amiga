@@ -17,6 +17,7 @@ add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/App
 
 # Tests
 add_executable(archivetest src/AppSupport/archive.c src/AppSupportTests/archivetest.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c)
+add_executable(archivetest2 src/AppSupport/archive.c src/AppSupportTests/archivetest2.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c)
 add_executable(fetchtest src/AppSupportTests/fetchtest.c src/AppSupport/network.c src/AppSupport/collections.c src/AppSupport/environment.c src/AppSupport/shell.c)
 add_executable(shelltest src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c src/AppSupport/shell.c src/AppSupport/network.c)
 
@@ -28,3 +29,4 @@ add_executable(tilemapfunctions src/BuildingBlocks/tilemapfunctions.c)
 target_link_libraries(sqliteclient PRIVATE libsqlite3.a)
 # Example for mui link lib
 #target_link_libraries(Clock PRIVATE libmui.a)
+

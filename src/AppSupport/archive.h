@@ -109,4 +109,14 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
  */
 BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* destPath);
 
+/**
+ * Adds a directory recursively to the archive.
+ * @param archive The archive handle.
+ * @param sourceDir The local directory path to add.
+ * @param entryPrefix The prefix name for entries in the archive (e.g., "data"). 
+ *                    If NULL, only the content of sourceDir will be added at the root.
+ * @return TRUE if successful, FALSE otherwise.
+ */
+BOOL archiveAddDirectory(Archive* archive, const char* sourceDir, const char* entryPrefix);
+
 #endif // APPSUPPORT_ARCHIVE_H

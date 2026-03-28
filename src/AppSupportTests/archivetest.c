@@ -147,6 +147,44 @@ int main() {
         free(data3);
     }
 
+    printf("Testing recursive directory addition...\n");
+    // Create a directory structure: T:recursive/fileA.txt, T:recursive/subdir/fileB.txt
+    const char* rec_dir = "T:recursive";
+    const char* rec_subdir = "T:recursive/subdir";
+    const char* fileA = "T:recursive/fileA.txt";
+    const char* fileB = "T:recursive/subdir/fileB.txt";
+    const char* contentA = "Content A";
+    const char* contentB = "Content B";
+
+    BPTR d1 = CreateDir((STRPTR)rec_dir);
+    if (d1) UnLock(d1);
+    BPTR d2 = CreateDir((STRPTR)rec_subdir);
+    if (d2) UnLock(d2);
+
+    createDummyFile(fileA, contentA);
+    createDummyFile(fileB, contentB);
+
+    ASSERT_TRUE(archiveAddDirectory(arch, rec_dir, "rec"));
+
+    printf("Verifying recursive addition...\n");
+    ASSERT_TRUE(archiveFileExists(arch, "rec/fileA.txt"));
+    ASSERT_TRUE(archiveFileExists(arch, "rec/subdir/fileB.txt"));
+
+    uint32_t sA, sB;
+    char* dA = (char*)archiveReadFile(arch, "rec/fileA.txt", &sA);
+    char* dB = (char*)archiveReadFile(arch, "rec/subdir/fileB.txt", &sB);
+
+    ASSERT_NOT_NULL(dA);
+    if (dA) {
+        ASSERT_STR_EQ(contentA, dA);
+        free(dA);
+    }
+    ASSERT_NOT_NULL(dB);
+    if (dB) {
+        ASSERT_STR_EQ(contentB, dB);
+        free(dB);
+    }
+
     archiveClose(arch);
     return testSummary();
 }

@@ -14,6 +14,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "archive.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <proto/dos.h>
@@ -145,8 +146,8 @@ static BOOL archiveAddOrReplaceFile(Archive* archive, const char* sourcePath, co
             Close(archFile);
             return FALSE;
         }
-        strncpy(newEntry->fileName, entryName, 255);
-        newEntry->fileName[255] = '\0';
+        memset(newEntry->fileName, 0, sizeof(newEntry->fileName));
+        strncpy(newEntry->fileName, entryName, sizeof(newEntry->fileName) - 1);
         newEntry->size = size;
         newEntry->offset = archive->tocOffset;
         listAppendElement(archive->entries, newEntry);
@@ -196,7 +197,9 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
     BPTR file = Open((STRPTR)archive->filename, MODE_OLDFILE);
     if (!file) return NULL;
 
-    void* buffer = malloc(entry->size);
+    //void* buffer = malloc(entry->size);
+    void* buffer = calloc(entry->size +1, 1);
+
     if (buffer) {
         Seek(file, entry->offset, OFFSET_BEGINNING);
         if (Read(file, buffer, entry->size) != entry->size) {
@@ -206,14 +209,15 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
             *outSize = entry->size;
         }
     }
+    //printf("Strlen of buffer: %d\n", strlen(buffer));
     Close(file);
     return buffer;
 }
 
 static void createPath(const char* path) {
     char temp[256];
-    strncpy(temp, path, 255);
-    temp[255] = '\0';
+    strncpy(temp, path, sizeof(temp) - 1);
+    temp[sizeof(temp) - 1] = '\0';
 
     char* p = temp;
     // Skip volume name (e.g., "T:")
@@ -272,4 +276,67 @@ BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* des
     Close(dest);
     Close(archFile);
     return success;
+}
+
+static BOOL archiveAddRecursive(Archive* archive, const char* sourceDir, const char* entryPrefix) {
+    if (!archive || !sourceDir) return FALSE;
+
+    BPTR lock = Lock((STRPTR)sourceDir, ACCESS_READ);
+    if (!lock) return FALSE;
+
+    struct FileInfoBlock* fib = (struct FileInfoBlock*)AllocDosObject(DOS_FIB, NULL);
+    if (!fib) {
+        UnLock(lock);
+        return FALSE;
+    }
+
+    BOOL success = TRUE;
+    if (Examine(lock, fib)) {
+        while (ExNext(lock, fib)) {
+            char fullPath[512];
+            char entryName[512];
+
+            if (strcmp(fib->fib_FileName, ".") == 0 || strcmp(fib->fib_FileName, "..") == 0) continue;
+
+            // Build full local path
+            if (entryPrefix && strlen(entryPrefix) > 0) {
+                snprintf(entryName, sizeof(entryName), "%s/%s", entryPrefix, fib->fib_FileName);
+            } else {
+                strncpy(entryName, fib->fib_FileName, sizeof(entryName) - 1);
+                entryName[sizeof(entryName) - 1] = '\0';
+            }
+
+            size_t dirLen = strlen(sourceDir);
+            char lastChar = sourceDir[dirLen - 1];
+            if (lastChar == ':' || lastChar == '/') {
+                snprintf(fullPath, sizeof(fullPath), "%s%s", sourceDir, fib->fib_FileName);
+            } else {
+                snprintf(fullPath, sizeof(fullPath), "%s/%s", sourceDir, fib->fib_FileName);
+            }
+
+            if (fib->fib_DirEntryType >= 0) {
+                // It's a directory, recurse
+                if (!archiveAddRecursive(archive, fullPath, entryName)) {
+                    success = FALSE;
+                    break;
+                }
+            } else {
+                // It's a file, add it
+                if (!archiveAddFile(archive, fullPath, entryName)) {
+                    success = FALSE;
+                    break;
+                }
+            }
+        }
+    } else {
+        success = FALSE;
+    }
+
+    FreeDosObject(DOS_FIB, fib);
+    UnLock(lock);
+    return success;
+}
+
+BOOL archiveAddDirectory(Archive* archive, const char* sourceDir, const char* entryPrefix) {
+    return archiveAddRecursive(archive, sourceDir, entryPrefix);
 }
