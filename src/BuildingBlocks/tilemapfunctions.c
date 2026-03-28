@@ -20,7 +20,7 @@
 #include <proto/exec.h>
 #include <proto/graphics.h>
 #include <proto/intuition.h>
-#include <proto/guigfx.h>
+#include <proto/guigfx_lib.h>
 #include <proto/exec.h>
 #include <graphics/modeid.h>
 #include <intuition/intuition.h>

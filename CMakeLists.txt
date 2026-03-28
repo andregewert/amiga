@@ -10,16 +10,21 @@ link_directories("${SQLITEPATH}/lib" "${AMISSLPATH}/lib/AmigaOS3" "/opt/amigagcc
 include_directories("${SQLITEPATH}/include" "${AMISSLPATH}/include" ${TTLIBPATH} src)
 add_compile_options(-m68020 -mcrt=clib2)
 
-add_executable(shelltest src/BuildingBlocks/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c src/AppSupport/shell.c src/AppSupport/network.c)
-add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c src/AppSupport/network.c)
-add_executable(fetchtest src/BuildingBlocks/fetchtest.c src/AppSupport/network.c src/AppSupport/collections.c src/AppSupport/environment.c src/AppSupport/shell.c)
+# Shell tools
 add_executable(fetch src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c)
 add_executable(cldir src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSupport/environment.c)
-add_executable(gfxtest src/BuildingBlocks/gfxtest.c)
-add_executable(tilemaptest src/BuildingBlocks/tilemaptest.c)
-add_executable(sqlitetest src/BuildingBlocks/sqlitetest.c)
-add_executable(archivetest src/AppSupport/archive.c src/BuildingBlocks/archivetest.c src/AppSupport/collections.c)
-add_executable(Clock src/muitest/Clock.c)
+add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c src/AppSupport/network.c)
 
-target_link_libraries(sqlitetest PRIVATE libsqlite3.a)
-target_link_libraries(Clock PRIVATE libmui.a)
+# Tests
+add_executable(archivetest src/AppSupport/archive.c src/AppSupportTests/archivetest.c src/AppSupport/collections.c)
+add_executable(fetchtest src/AppSupportTests/fetchtest.c src/AppSupport/network.c src/AppSupport/collections.c src/AppSupport/environment.c src/AppSupport/shell.c)
+add_executable(shelltest src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c src/AppSupport/shell.c src/AppSupport/network.c)
+
+# Building blocks
+add_executable(gfxfunctions src/BuildingBlocks/gfxfunctions.c)
+add_executable(sqliteclient src/BuildingBlocks/sqliteclient.c)
+add_executable(tilemapfunctions src/BuildingBlocks/tilemapfunctions.c)
+
+target_link_libraries(sqliteclient PRIVATE libsqlite3.a)
+# Example for mui link lib
+#target_link_libraries(Clock PRIVATE libmui.a)

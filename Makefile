@@ -14,5 +14,5 @@ prepare:
 clean:
 	rm -r build
 
-shelltest: prepare src/BuildingBlocks/shelltest.c src/AppSupport/environment.c
+shelltest: prepare src/AppSupportTests/shelltest.c src/AppSupport/environment.c
 	$(cc) src/shelltest/shelltest.c src/AppSupport/environment.c -o build/shelltest
