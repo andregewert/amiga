@@ -210,6 +210,31 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
     return buffer;
 }
 
+static void createPath(const char* path) {
+    char temp[256];
+    strncpy(temp, path, 255);
+    temp[255] = '\0';
+
+    char* p = temp;
+    // Skip volume name (e.g., "T:")
+    char* colon = strchr(p, ':');
+    if (colon) {
+        p = colon + 1;
+    }
+
+    while (*p) {
+        if (*p == '/') {
+            *p = '\0';
+            BPTR lock = CreateDir((STRPTR)temp);
+            if (lock) {
+                UnLock(lock);
+            }
+            *p = '/';
+        }
+        p++;
+    }
+}
+
 BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* destPath) {
     if (!archive || !entryName || !destPath) return FALSE;
     ArchiveEntry* entry = findEntry(archive, entryName);
@@ -218,6 +243,7 @@ BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* des
     BPTR archFile = Open((STRPTR)archive->filename, MODE_OLDFILE);
     if (!archFile) return FALSE;
 
+    createPath(destPath);
     BPTR dest = Open((STRPTR)destPath, MODE_NEWFILE);
     if (!dest) {
         Close(archFile);

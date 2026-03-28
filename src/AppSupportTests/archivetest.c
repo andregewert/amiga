@@ -120,6 +120,33 @@ int main() {
         free(new_data1);
     }
 
+    printf("Testing path support...\n");
+    const char* file_with_path = "T:subdir/file3.txt";
+    const char* entry_with_path = "subdir/file3.txt";
+    const char* content3 = "File in a subdirectory";
+
+    // Ensure directory for dummy file exists
+    BPTR dirLock = CreateDir((STRPTR)"T:subdir");
+    if (dirLock) UnLock(dirLock);
+
+    createDummyFile(file_with_path, content3);
+    
+    ASSERT_TRUE(archiveAddFile(arch, file_with_path, entry_with_path));
+    
+    printf("Extracting %s to T:extracted_subdir/file3.txt...\n", entry_with_path);
+    // This extraction should create T:extracted_subdir/
+    ASSERT_TRUE(archiveExtractFile(arch, entry_with_path, "T:extracted_subdir/file3.txt"));
+
+    printf("Verifying extracted file...\n");
+    uint32_t size3;
+    char* data3 = (char*)archiveReadFile(arch, entry_with_path, &size3);
+    ASSERT_NOT_NULL(data3);
+    if (data3) {
+        ASSERT_INT_EQ(strlen(content3), size3);
+        ASSERT_STR_EQ(content3, data3);
+        free(data3);
+    }
+
     archiveClose(arch);
     return testSummary();
 }
