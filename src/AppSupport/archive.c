@@ -197,19 +197,20 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
     BPTR file = Open((STRPTR)archive->filename, MODE_OLDFILE);
     if (!file) return NULL;
 
-    //void* buffer = malloc(entry->size);
     void* buffer = calloc(entry->size +1, 1);
-
+    //void* buffer = malloc(entry->size + 1);
     if (buffer) {
         Seek(file, entry->offset, OFFSET_BEGINNING);
         if (Read(file, buffer, entry->size) != entry->size) {
             free(buffer);
             buffer = NULL;
-        } else if (outSize) {
-            *outSize = entry->size;
+        } else {
+            ((char*)buffer)[entry->size] = '\0';
+            if (outSize) {
+                *outSize = entry->size;
+            }
         }
     }
-    //printf("Strlen of buffer: %d\n", strlen(buffer));
     Close(file);
     return buffer;
 }
