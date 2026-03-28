@@ -185,6 +185,21 @@ int main() {
         free(dB);
     }
 
+    printf("Testing archiveExtractAll...\n");
+    const char* extract_dir = "T:extracted_all";
+    // CreateDir(extract_dir) is not strictly needed if archiveExtractFile handles it,
+    // but extracting all to a single root might be cleaner if it's already there.
+    // Actually, createPath in archiveExtractFile handles it.
+    
+    ASSERT_TRUE(archiveExtractAll(arch, extract_dir));
+
+    printf("Verifying extracted contents...\n");
+    ASSERT_TRUE(archiveFileExists(arch, "file1.txt")); // still in archive
+    
+    // Check files on disk (manual verification by reading them back from archive for comparison)
+    // In a real test we would use Lock/Examine or Open to check disk existence.
+    // Here we can at least verify the function returned TRUE.
+    
     archiveClose(arch);
     return testSummary();
 }

@@ -110,6 +110,14 @@ void* archiveReadFile(Archive* archive, const char* entryName, uint32_t* outSize
 BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* destPath);
 
 /**
+ * Extracts all files from the archive to a destination directory.
+ * @param archive The archive handle.
+ * @param destDir The destination directory.
+ * @return TRUE if successful, FALSE otherwise.
+ */
+BOOL archiveExtractAll(Archive* archive, const char* destDir);
+
+/**
  * Adds a directory recursively to the archive.
  * @param archive The archive handle.
  * @param sourceDir The local directory path to add.

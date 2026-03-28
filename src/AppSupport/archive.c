@@ -279,6 +279,34 @@ BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* des
     return success;
 }
 
+BOOL archiveExtractAll(Archive* archive, const char* destDir) {
+    if (!archive || !destDir) return FALSE;
+
+    size_t destLen = strlen(destDir);
+    char lastChar = destLen > 0 ? destDir[destLen - 1] : '\0';
+    BOOL needsSeparator = (lastChar != '\0' && lastChar != ':' && lastChar != '/');
+
+    listElement* current = archive->entries->firstElement;
+    while (current) {
+        ArchiveEntry* entry = (ArchiveEntry*)current->data;
+        char fullDestPath[512];
+
+        if (needsSeparator) {
+            snprintf(fullDestPath, sizeof(fullDestPath), "%s/%s", destDir, entry->fileName);
+        } else {
+            snprintf(fullDestPath, sizeof(fullDestPath), "%s%s", destDir, entry->fileName);
+        }
+
+        if (!archiveExtractFile(archive, entry->fileName, fullDestPath)) {
+            return FALSE;
+        }
+
+        current = current->nextElement;
+    }
+
+    return TRUE;
+}
+
 static BOOL archiveAddRecursive(Archive* archive, const char* sourceDir, const char* entryPrefix) {
     if (!archive || !sourceDir) return FALSE;
 
