@@ -16,7 +16,23 @@
 #ifndef APPSUPPORT_IMAGE_H
 #define APPSUPPORT_IMAGE_H
 
-#include <exec/types.h>
+#include <utility/tagitem.h>
+
+/**
+ * Calculates the brightness of an RGB color.
+ * Result is in the range [0, 255].
+ */
+uint32_t getBrightness(uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * Maps a brightness value [0, 255] to an ASCII character.
+ */
+char mapBrightnessToAscii(uint32_t brightness);
+
+/**
+ * Maps an RGB color to the closest shell color.
+ */
+const char* mapRgbToShellColor(uint8_t r, uint8_t g, uint8_t b);
 
 /**
  * Reads an IFF ILBM image and converts it into colored ASCII output printed to stdout.

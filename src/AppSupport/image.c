@@ -18,11 +18,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <proto/exec.h>
-#include <proto/guigfx_lib.h>
-#include <guigfx/guigfx.h>
-#include <render/render.h>
-
-extern struct Library *GuiGFXBase;
+#include <proto/datatypes.h>
+#include <proto/graphics.h>
+#include <datatypes/pictureclass.h>
+#include <clib/alib_protos.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 // ASCII characters sorted by density (light to dark)
 static const char* ASCII_CHARS = " .:-=+*#%@";
@@ -32,14 +33,14 @@ static const char* ASCII_CHARS = " .:-=+*#%@";
  * Calculates the brightness of an RGB color.
  * Result is in the range [0, 255].
  */
-static inline uint32_t getBrightness(uint8_t r, uint8_t g, uint8_t b) {
+uint32_t getBrightness(uint8_t r, uint8_t g, uint8_t b) {
     return (uint32_t)(0.299f * r + 0.587f * g + 0.114f * b);
 }
 
 /**
  * Maps a brightness value [0, 255] to an ASCII character.
  */
-static char mapBrightnessToAscii(uint32_t brightness) {
+char mapBrightnessToAscii(uint32_t brightness) {
     uint32_t asciiIdx = (brightness * (NUM_ASCII_CHARS - 1)) / 255;
     return ASCII_CHARS[asciiIdx];
 }
@@ -47,7 +48,7 @@ static char mapBrightnessToAscii(uint32_t brightness) {
 /**
  * Maps an RGB color to the closest shell color.
  */
-static const char* mapRgbToShellColor(uint8_t r, uint8_t g, uint8_t b) {
+const char* mapRgbToShellColor(uint8_t r, uint8_t g, uint8_t b) {
     // Very simple mapping for demonstration. 
     // Could be improved with a proper distance calculation in color space.
     if (r < 64 && g < 64 && b < 64) return SHELL_FG_BLACK;
@@ -59,12 +60,60 @@ static const char* mapRgbToShellColor(uint8_t r, uint8_t g, uint8_t b) {
     
     if (r > 128 && g > 128) return (r > 192) ? SHELL_FG_BRIGHT_YELLOW : SHELL_FG_YELLOW;
     if (r > 128 && b > 128) return (r > 192) ? SHELL_FG_BRIGHT_MAGENTA : SHELL_FG_MAGENTA;
-    if (g > 128 && b > 128) return (g > 192) ? SHELL_FG_BRIGHT_CYAN : SHELL_FG_CYAN;
+    if (g > 128 && b > 128) return (r > 192) ? SHELL_FG_BRIGHT_CYAN : SHELL_FG_CYAN;
 
     return SHELL_FG_WHITE;
 }
 
-static void renderImage(uint32_t* rawData, uint32_t width, uint32_t height, uint32_t targetWidth) {
+BOOL imagePrintAscii(const char* filename, uint32_t targetWidth) {
+    struct Library* DataTypesBase = OpenLibrary("datatypes.library", 39);
+    if (!DataTypesBase) {
+        fprintf(stderr, "Could not open datatypes.library\n");
+        return FALSE;
+    }
+
+    struct Library* GraphicsBase = OpenLibrary("graphics.library", 0);
+    if (!GraphicsBase) {
+        fprintf(stderr, "Could not open graphics.library\n");
+        CloseLibrary(DataTypesBase);
+        return FALSE;
+    }
+
+    Object* dto = NewDTObject((STRPTR)filename,
+        DTA_SourceType, DTST_FILE,
+        DTA_GroupID, GID_PICTURE,
+        PDTA_Remap, FALSE, // We want raw colors if possible
+        TAG_DONE);
+
+    if (!dto) {
+        fprintf(stderr, "Could not load image via datatypes: %s\n", filename);
+        CloseLibrary(GraphicsBase);
+        CloseLibrary(DataTypesBase);
+        return FALSE;
+    }
+
+    // Perform layout
+    DoMethod(dto, DTM_PROCLAYOUT, NULL, 1);
+
+    struct BitMapHeader* bmh = NULL;
+    struct BitMap* bm = NULL;
+
+    GetDTAttrs(dto,
+        PDTA_BitMapHeader, (uintptr_t)&bmh,
+        PDTA_BitMap, (uintptr_t)&bm,
+        TAG_DONE);
+
+    if (!bmh || !bm) {
+        fprintf(stderr, "Could not get bitmap information from datatype object\n");
+        DisposeDTObject(dto);
+        CloseLibrary(GraphicsBase);
+        CloseLibrary(DataTypesBase);
+        return FALSE;
+    }
+
+    uint32_t width = bmh->bmh_Width;
+    uint32_t height = bmh->bmh_Height;
+
     if (targetWidth == 0) targetWidth = 80;
     if (targetWidth > width) targetWidth = width;
 
@@ -73,19 +122,37 @@ static void renderImage(uint32_t* rawData, uint32_t width, uint32_t height, uint
     float scaleY = scaleX * 2.0f; // ASCII chars are taller than wide
     uint32_t targetHeight = (uint32_t)((float)height / scaleY);
 
-    for (uint32_t y = 0; y < targetHeight; y++) {
-        for (uint32_t x = 0; x < targetWidth; x++) {
-            // Sample the image (nearest neighbor)
-            uint32_t imgX = (uint32_t)(x * scaleX);
-            uint32_t imgY = (uint32_t)(y * scaleY);
-            
-            if (imgX >= width) imgX = width - 1;
-            if (imgY >= height) imgY = height - 1;
+    // We no longer use ReadPixelArray from cybergraphics, 
+    // but use PDTM_READPIXELARRAY from pictureclass.
+    // This is more standard for datatypes and doesn't require CyberGraphX.
 
-            uint32_t pixel = rawData[imgY * width + imgX];
-            uint8_t r = (pixel >> 16) & 0xFF;
-            uint8_t g = (pixel >> 8) & 0xFF;
-            uint8_t b = pixel & 0xFF;
+    for (uint32_t y = 0; y < targetHeight; y++) {
+        uint32_t imgY = (uint32_t)(y * scaleY);
+        if (imgY >= height) imgY = height - 1;
+
+        for (uint32_t x = 0; x < targetWidth; x++) {
+            uint32_t imgX = (uint32_t)(x * scaleX);
+            if (imgX >= width) imgX = width - 1;
+
+            uint8_t rgb[3];
+            uint8_t r, g, b;
+            struct pdtBlitPixelArray pbpa;
+            pbpa.MethodID = PDTM_READPIXELARRAY;
+            pbpa.pbpa_PixelData = rgb;
+            pbpa.pbpa_PixelFormat = PBPAFMT_RGB;
+            pbpa.pbpa_PixelArrayMod = 3;
+            pbpa.pbpa_Left = imgX;
+            pbpa.pbpa_Top = imgY;
+            pbpa.pbpa_Width = 1;
+            pbpa.pbpa_Height = 1;
+
+            if (DoMethodA(dto, (Msg)&pbpa) == 0) {
+                r = g = b = 0; 
+            } else {
+                r = rgb[0];
+                g = rgb[1];
+                b = rgb[2];
+            }
 
             uint32_t brightness = getBrightness(r, g, b);
             char asciiChar = mapBrightnessToAscii(brightness);
@@ -95,47 +162,10 @@ static void renderImage(uint32_t* rawData, uint32_t width, uint32_t height, uint
         }
         printf("\n");
     }
-}
 
-BOOL imagePrintAscii(const char* filename, uint32_t targetWidth) {
-    struct Library* base = OpenLibrary("guigfx.library", 0);
-    if (!base) {
-        fprintf(stderr, "Could not open guigfx.library\n");
-        return FALSE;
-    }
-    GuiGFXBase = base;
+    DisposeDTObject(dto);
+    CloseLibrary(GraphicsBase);
+    CloseLibrary(DataTypesBase);
 
-    APTR picture = LoadPicture((STRPTR)filename, TAG_DONE);
-    if (!picture) {
-        fprintf(stderr, "Could not load image: %s\n", filename);
-        CloseLibrary(GuiGFXBase);
-        return FALSE;
-    }
-
-    uint32_t width = 0, height = 0, pixelFormat = 0;
-    uint32_t* rawData = NULL;
-
-    GetPictureAttrs(picture, 
-        PICATTR_Width, &width,
-        PICATTR_Height, &height,
-        PICATTR_RawData, &rawData,
-        PICATTR_PixelFormat, &pixelFormat,
-        TAG_DONE);
-
-    BOOL success = FALSE;
-
-    if (rawData) {
-        if (pixelFormat == PIXFMT_0RGB_32) {
-            renderImage(rawData, width, height, targetWidth);
-            success = TRUE;
-        } else {
-            fprintf(stderr, "Unsupported pixel format: %u\n", pixelFormat);
-        }
-    } else {
-        fprintf(stderr, "Could not get raw data from picture\n");
-    }
-
-    DeletePicture(picture);
-    CloseLibrary(GuiGFXBase);
-    return success;
+    return TRUE;
 }
