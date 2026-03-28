@@ -16,14 +16,10 @@
 #include "image.h"
 #include "shell.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <proto/exec.h>
 #include <proto/datatypes.h>
-#include <proto/graphics.h>
 #include <datatypes/pictureclass.h>
 #include <clib/alib_protos.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 // ASCII characters sorted by density (light to dark)
 static const char* ASCII_CHARS = " .:-=+*#%@";
@@ -166,6 +162,7 @@ BOOL imagePrintAscii(const char* filename, uint32_t targetWidth) {
     DisposeDTObject(dto);
     CloseLibrary(GraphicsBase);
     CloseLibrary(DataTypesBase);
+    shellResetColor();
 
     return TRUE;
 }

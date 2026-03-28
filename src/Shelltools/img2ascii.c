@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <proto/dos.h>
-#include <dos/dos.h>
 
 int main(int argc, char* argv[]) {
     STRPTR template = (STRPTR)"FILE/A,WIDTH/N";
