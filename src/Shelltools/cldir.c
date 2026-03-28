@@ -40,74 +40,18 @@ typedef struct {
     struct DateStamp date;
 } DirEntry;
 
-static const char* getColorForEntry(const char* name, LONG type, LONG protection) {
-    if (type == ST_LINKDIR || type == ST_LINKFILE) {
-        return SHELL_FG_BRIGHT_MAGENTA;
-    }
+typedef enum {
+    SORT_NAME,
+    SORT_SIZE,
+    SORT_DATE
+} SortMode;
 
-    if (type > 0) {
-        return SHELL_FG_BRIGHT_BLUE;
-    }
+static SortMode currentSortMode = SORT_NAME;
+static BOOL reverseSort = FALSE;
 
-    if (isInfoFile(name)) {
-        return SHELL_FG_BRIGHT_BLACK;
-    }
-
-    if (!(protection & FIBF_EXECUTE)) {
-        return SHELL_FG_BRIGHT_GREEN;
-    }
-
-    const char* ext = strrchr(name, '.');
-    if (ext) {
-        if (strcasecmp(ext, ".lha") == 0 || strcasecmp(ext, ".zip") == 0 || 
-            strcasecmp(ext, ".lzx") == 0 || strcasecmp(ext, ".tar") == 0 ||
-            strcasecmp(ext, ".gz") == 0) {
-            return SHELL_FG_BRIGHT_YELLOW;
-        }
-        if (strcasecmp(ext, ".iff") == 0 || strcasecmp(ext, ".ilbm") == 0 || 
-            strcasecmp(ext, ".jpg") == 0 || strcasecmp(ext, ".png") == 0 ||
-            strcasecmp(ext, ".gif") == 0 || strcasecmp(ext, ".bmp") == 0) {
-            return SHELL_FG_BRIGHT_MAGENTA;
-        }
-        if (strcasecmp(ext, ".c") == 0 || strcasecmp(ext, ".h") == 0 || 
-            strcasecmp(ext, ".txt") == 0 || strcasecmp(ext, ".doc") == 0 ||
-            strcasecmp(ext, ".readme") == 0) {
-            return SHELL_FG_BRIGHT_CYAN;
-        }
-    }
-
-    return SHELL_COLOR_RESET;
-}
-
-static void formatProtection(LONG prot, char* buf) {
-    buf[0] = (prot & FIBF_HOLD) ? 'h' : '-';
-    buf[1] = (prot & FIBF_SCRIPT) ? 's' : '-';
-    buf[2] = (prot & FIBF_PURE) ? 'p' : '-';
-    buf[3] = (prot & FIBF_ARCHIVE) ? 'a' : '-';
-    buf[4] = (prot & FIBF_READ) ? '-' : 'r';
-    buf[5] = (prot & FIBF_WRITE) ? '-' : 'w';
-    buf[6] = (prot & FIBF_EXECUTE) ? '-' : 'e';
-    buf[7] = (prot & FIBF_DELETE) ? '-' : 'd';
-    buf[8] = '\0';
-}
-
-static void formatDate(struct DateStamp* ds, char* outBuf) {
-    char day[LEN_DATSTRING];
-    char date[LEN_DATSTRING];
-    char time[LEN_DATSTRING];
-    struct DateTime dt;
-    dt.dat_Stamp = *ds;
-    dt.dat_Format = FORMAT_DOS;
-    dt.dat_Flags = 0;
-    dt.dat_StrDay = day;
-    dt.dat_StrDate = date;
-    dt.dat_StrTime = time;
-    if (DateToStr(&dt)) {
-        sprintf(outBuf, "%s %s", date, time);
-    } else {
-        strcpy(outBuf, "invalid date");
-    }
-}
+static const char* getColorForEntry(const char* name, LONG type, LONG protection);
+static void formatProtection(LONG prot, char* buf);
+static void formatDate(struct DateStamp* ds, char* outBuf);
 
 static int compareEntries(const void* a, const void* b) {
     const DirEntry* e1 = (const DirEntry*)a;
@@ -117,21 +61,62 @@ static int compareEntries(const void* a, const void* b) {
     if (e1->type > 0 && e2->type <= 0) return -1;
     if (e1->type <= 0 && e2->type > 0) return 1;
 
-    // Then alphabetical (case-insensitive)
-    return strcasecmp(e1->name, e2->name);
+    int result = 0;
+    switch (currentSortMode) {
+        case SORT_SIZE:
+            if (e1->size < e2->size) result = -1;
+            else if (e1->size > e2->size) result = 1;
+            else result = 0;
+            break;
+        case SORT_DATE:
+            if (e1->date.ds_Days < e2->date.ds_Days) result = -1;
+            else if (e1->date.ds_Days > e2->date.ds_Days) result = 1;
+            else if (e1->date.ds_Minute < e2->date.ds_Minute) result = -1;
+            else if (e1->date.ds_Minute > e2->date.ds_Minute) result = 1;
+            else if (e1->date.ds_Tick < e2->date.ds_Tick) result = -1;
+            else if (e1->date.ds_Tick > e2->date.ds_Tick) result = 1;
+            else result = 0;
+            break;
+        case SORT_NAME:
+        default:
+            result = strcasecmp(e1->name, e2->name);
+            break;
+    }
+
+    if (reverseSort) result = -result;
+
+    return result;
 }
 
 int main(int argc, char** argv) {
-    STRPTR template = (STRPTR)"DIR/M,NOINFO/S";
+    STRPTR template = (STRPTR)"DIR/M,NOINFO/S,SORT/K,REVERSE/S";
     struct {
         char** dirs;
         LONG noinfo;
-    } args = {NULL, 0};
+        char* sort;
+        LONG reverse;
+    } args = {NULL, 0, NULL, 0};
 
     struct RDArgs* rdargs = ReadArgs(template, (intptr_t*)&args, NULL);
     if (!rdargs) {
         PrintFault(IoErr(), (STRPTR)"cldir");
         return EXIT_FAILURE;
+    }
+
+    if (args.sort) {
+        if (strcasecmp(args.sort, "SIZE") == 0) {
+            currentSortMode = SORT_SIZE;
+        } else if (strcasecmp(args.sort, "DATE") == 0) {
+            currentSortMode = SORT_DATE;
+        } else if (strcasecmp(args.sort, "NAME") == 0) {
+            currentSortMode = SORT_NAME;
+        } else {
+            fprintf(stderr, "Unknown sort mode: %s. Using default (Name).\n", args.sort);
+        }
+    }
+
+    if (args.reverse) {
+        reverseSort = TRUE;
     }
 
     struct FileInfoBlock* fib = AllocDosObject(DOS_FIB, NULL);
@@ -239,4 +224,73 @@ int main(int argc, char** argv) {
     FreeDosObject(DOS_FIB, fib);
     FreeArgs(rdargs);
     return EXIT_SUCCESS;
+}
+
+static const char* getColorForEntry(const char* name, LONG type, LONG protection) {
+    if (type == ST_LINKDIR || type == ST_LINKFILE) {
+        return SHELL_FG_BRIGHT_MAGENTA;
+    }
+
+    if (type > 0) {
+        return SHELL_FG_BRIGHT_BLUE;
+    }
+
+    if (isInfoFile(name)) {
+        return SHELL_FG_BRIGHT_BLACK;
+    }
+
+    if (!(protection & FIBF_EXECUTE)) {
+        return SHELL_FG_BRIGHT_GREEN;
+    }
+
+    const char* ext = strrchr(name, '.');
+    if (ext) {
+        if (strcasecmp(ext, ".lha") == 0 || strcasecmp(ext, ".zip") == 0 || 
+            strcasecmp(ext, ".lzx") == 0 || strcasecmp(ext, ".tar") == 0 ||
+            strcasecmp(ext, ".gz") == 0) {
+            return SHELL_FG_BRIGHT_YELLOW;
+        }
+        if (strcasecmp(ext, ".iff") == 0 || strcasecmp(ext, ".ilbm") == 0 || 
+            strcasecmp(ext, ".jpg") == 0 || strcasecmp(ext, ".png") == 0 ||
+            strcasecmp(ext, ".gif") == 0 || strcasecmp(ext, ".bmp") == 0) {
+            return SHELL_FG_BRIGHT_MAGENTA;
+        }
+        if (strcasecmp(ext, ".c") == 0 || strcasecmp(ext, ".h") == 0 || 
+            strcasecmp(ext, ".txt") == 0 || strcasecmp(ext, ".doc") == 0 ||
+            strcasecmp(ext, ".readme") == 0) {
+            return SHELL_FG_BRIGHT_CYAN;
+        }
+    }
+
+    return SHELL_COLOR_RESET;
+}
+
+static void formatProtection(LONG prot, char* buf) {
+    buf[0] = (prot & FIBF_HOLD) ? 'h' : '-';
+    buf[1] = (prot & FIBF_SCRIPT) ? 's' : '-';
+    buf[2] = (prot & FIBF_PURE) ? 'p' : '-';
+    buf[3] = (prot & FIBF_ARCHIVE) ? 'a' : '-';
+    buf[4] = (prot & FIBF_READ) ? '-' : 'r';
+    buf[5] = (prot & FIBF_WRITE) ? '-' : 'w';
+    buf[6] = (prot & FIBF_EXECUTE) ? '-' : 'e';
+    buf[7] = (prot & FIBF_DELETE) ? '-' : 'd';
+    buf[8] = '\0';
+}
+
+static void formatDate(struct DateStamp* ds, char* outBuf) {
+    char day[LEN_DATSTRING];
+    char date[LEN_DATSTRING];
+    char time[LEN_DATSTRING];
+    struct DateTime dt;
+    dt.dat_Stamp = *ds;
+    dt.dat_Format = FORMAT_DOS;
+    dt.dat_Flags = 0;
+    dt.dat_StrDay = day;
+    dt.dat_StrDate = date;
+    dt.dat_StrTime = time;
+    if (DateToStr(&dt)) {
+        sprintf(outBuf, "%s %s", date, time);
+    } else {
+        strcpy(outBuf, "invalid date");
+    }
 }
