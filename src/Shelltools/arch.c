@@ -16,24 +16,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include "../AppSupport/archive.h"
 #include "../AppSupport/collections.h"
 
 int main(int argc, char** argv) {
-    STRPTR template = (STRPTR)"ARCHIVE/A,LIST/S,ADD/M,EXTRACT/M,EXTRACTALL/S,REPLACE/M,EXISTS/K,DIR/M,TO/K";
+    STRPTR template = (STRPTR)"ARCHIVE/A,COMMAND/A,FILES/M,TO/K";
     struct {
         char* archive_path;
-        LONG list;
-        char** add;
-        char** extract;
-        LONG extractall;
-        char** replace;
-        char* exists;
-        char** dir;
+        char* command;
+        char** files;
         char* to;
-    } args = {NULL, 0, NULL, NULL, 0, NULL, NULL, NULL, NULL};
+    } args = {NULL, NULL, NULL, NULL};
 
     struct RDArgs* rdargs = ReadArgs(template, (intptr_t*)&args, NULL);
     if (!rdargs) {
@@ -48,7 +44,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (args.list) {
+    if (strcasecmp(args.command, "LIST") == 0) {
         linkedList* toc = archiveGetTOC(archive);
         if (toc) {
             listElement* curr = toc->firstElement;
@@ -61,90 +57,90 @@ int main(int argc, char** argv) {
                 curr = curr->nextElement;
             }
         }
-    }
+    } else if (strcasecmp(args.command, "ADD") == 0) {
+        if (args.files) {
+            char** add_ptr = args.files;
+            while (*add_ptr) {
+                const char* sourcePath = *add_ptr;
+                const char* entryName = strrchr(sourcePath, '/');
+                if (!entryName) entryName = strrchr(sourcePath, ':');
+                if (entryName) entryName++; else entryName = sourcePath;
 
-    if (args.add) {
-        char** add_ptr = args.add;
-        while (*add_ptr) {
-            const char* sourcePath = *add_ptr;
-            const char* entryName = strrchr(sourcePath, '/');
-            if (!entryName) entryName = strrchr(sourcePath, ':');
-            if (entryName) entryName++; else entryName = sourcePath;
-
-            if (archiveAddFile(archive, sourcePath, entryName)) {
-                printf("Added: %s as %s\n", sourcePath, entryName);
-            } else {
-                fprintf(stderr, "Failed to add: %s\n", sourcePath);
+                if (archiveAddFile(archive, sourcePath, entryName)) {
+                    printf("Added: %s as %s\n", sourcePath, entryName);
+                } else {
+                    fprintf(stderr, "Failed to add: %s\n", sourcePath);
+                }
+                add_ptr++;
             }
-            add_ptr++;
         }
-    }
+    } else if (strcasecmp(args.command, "REPLACE") == 0) {
+        if (args.files) {
+            char** replace_ptr = args.files;
+            while (*replace_ptr) {
+                const char* sourcePath = *replace_ptr;
+                const char* entryName = strrchr(sourcePath, '/');
+                if (!entryName) entryName = strrchr(sourcePath, ':');
+                if (entryName) entryName++; else entryName = sourcePath;
 
-    if (args.replace) {
-        char** replace_ptr = args.replace;
-        while (*replace_ptr) {
-            const char* sourcePath = *replace_ptr;
-            const char* entryName = strrchr(sourcePath, '/');
-            if (!entryName) entryName = strrchr(sourcePath, ':');
-            if (entryName) entryName++; else entryName = sourcePath;
-
-            if (archiveReplaceFile(archive, sourcePath, entryName)) {
-                printf("Replaced: %s\n", entryName);
-            } else {
-                fprintf(stderr, "Failed to replace: %s\n", entryName);
+                if (archiveReplaceFile(archive, sourcePath, entryName)) {
+                    printf("Replaced: %s\n", entryName);
+                } else {
+                    fprintf(stderr, "Failed to replace: %s\n", entryName);
+                }
+                replace_ptr++;
             }
-            replace_ptr++;
         }
-    }
+    } else if (strcasecmp(args.command, "EXTRACT") == 0) {
+        if (args.files) {
+            char** extract_ptr = args.files;
+            while (*extract_ptr) {
+                const char* entryName = *extract_ptr;
+                char destPath[256];
+                if (args.to) {
+                    snprintf(destPath, sizeof(destPath), "%s/%s", args.to, entryName);
+                } else {
+                    strncpy(destPath, entryName, sizeof(destPath));
+                }
 
-    if (args.extract) {
-        char** extract_ptr = args.extract;
-        while (*extract_ptr) {
-            const char* entryName = *extract_ptr;
-            char destPath[256];
-            if (args.to) {
-                snprintf(destPath, sizeof(destPath), "%s/%s", args.to, entryName);
-            } else {
-                strncpy(destPath, entryName, sizeof(destPath));
+                if (archiveExtractFile(archive, entryName, destPath)) {
+                    printf("Extracted: %s\n", entryName);
+                } else {
+                    fprintf(stderr, "Failed to extract: %s\n", entryName);
+                }
+                extract_ptr++;
             }
-            
-            if (archiveExtractFile(archive, entryName, destPath)) {
-                printf("Extracted: %s\n", entryName);
-            } else {
-                fprintf(stderr, "Failed to extract: %s\n", entryName);
-            }
-            extract_ptr++;
         }
-    }
-
-    if (args.extractall) {
+    } else if (strcasecmp(args.command, "EXTRACTALL") == 0) {
         const char* destDir = args.to ? args.to : ".";
         if (archiveExtractAll(archive, destDir)) {
             printf("Extracted all to: %s\n", destDir);
         } else {
             fprintf(stderr, "Failed to extract all files\n");
         }
-    }
-
-    if (args.exists) {
-        if (archiveFileExists(archive, args.exists)) {
-            printf("File exists: %s\n", args.exists);
-        } else {
-            printf("File does NOT exist: %s\n", args.exists);
-        }
-    }
-
-    if (args.dir) {
-        char** dir_ptr = args.dir;
-        while (*dir_ptr) {
-            const char* sourceDir = *dir_ptr;
-            if (archiveAddDirectory(archive, sourceDir, NULL)) {
-                printf("Added directory: %s\n", sourceDir);
+    } else if (strcasecmp(args.command, "EXISTS") == 0) {
+        if (args.files && *args.files) {
+            if (archiveFileExists(archive, *args.files)) {
+                printf("File exists: %s\n", *args.files);
             } else {
-                fprintf(stderr, "Failed to add directory: %s\n", sourceDir);
+                printf("File does NOT exist: %s\n", *args.files);
             }
-            dir_ptr++;
         }
+    } else if (strcasecmp(args.command, "DIR") == 0) {
+        if (args.files) {
+            char** dir_ptr = args.files;
+            while (*dir_ptr) {
+                const char* sourceDir = *dir_ptr;
+                if (archiveAddDirectory(archive, sourceDir, NULL)) {
+                    printf("Added directory: %s\n", sourceDir);
+                } else {
+                    fprintf(stderr, "Failed to add directory: %s\n", sourceDir);
+                }
+                dir_ptr++;
+            }
+        }
+    } else {
+        fprintf(stderr, "Unknown command: %s\n", args.command);
     }
 
     archiveClose(archive);

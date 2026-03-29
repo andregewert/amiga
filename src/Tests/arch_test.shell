@@ -1,0 +1,83 @@
+; arch_test.ss - test script for the arch program
+echo "Creating dummy files..."
+echo "Hello World" > test1.txt
+echo "Amiga rules" > test2.txt
+makedir testdir
+echo "Inside dir" > testdir/test3.txt
+
+echo "Testing ARCH ADD..."
+arch test_archive.arch ADD test1.txt test2.txt
+if warn
+    echo "FAILED: Adding files to archive"
+    quit 20
+endif
+
+echo "Testing ARCH LIST..."
+arch test_archive.arch LIST
+if warn
+    echo "FAILED: Listing archive"
+    quit 20
+endif
+
+echo "Testing ARCH EXISTS..."
+arch test_archive.arch EXISTS test1.txt
+if warn
+    echo "FAILED: EXISTS test1.txt"
+    quit 20
+endif
+
+echo "Testing ARCH DIR..."
+arch test_archive.arch DIR testdir
+if warn
+    echo "FAILED: Adding directory"
+    quit 20
+endif
+
+echo "Testing ARCH EXTRACT..."
+makedir out
+arch test_archive.arch EXTRACT test1.txt TO out
+if warn
+    echo "FAILED: Extracting file"
+    quit 20
+endif
+
+if not exists out/test1.txt
+    echo "FAILED: Extracted file out/test1.txt not found"
+    quit 20
+endif
+
+echo "Testing ARCH REPLACE..."
+echo "New content" > test1.txt
+arch test_archive.arch REPLACE test1.txt
+if warn
+    echo "FAILED: Replacing file"
+    quit 20
+endif
+
+echo "Testing ARCH EXTRACTALL..."
+makedir out_all
+arch test_archive.arch EXTRACTALL TO out_all
+if warn
+    echo "FAILED: Extracting all files"
+    quit 20
+endif
+
+echo "Testing ARCH LIST (lowercase)..."
+arch test_archive.arch list
+if warn
+    echo "FAILED: Listing archive (lowercase)"
+    quit 20
+endif
+
+echo "Cleaning up..."
+delete test1.txt test2.txt test_archive.arch
+delete testdir/test3.txt
+delete testdir
+delete out/test1.txt
+delete out
+delete out_all/test1.txt
+delete out_all/test2.txt
+delete out_all/test3.txt
+delete out_all
+
+echo "All tests PASSED!"
