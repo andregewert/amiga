@@ -1,0 +1,36 @@
+; Test script for shell color tools
+echo "Testing shprintf..."
+shprintf "This is black text" COLOR BLACK
+shprintf "This is red text" COLOR RED
+shprintf "This is green text" COLOR GREEN
+shprintf "This is yellow text" COLOR YELLOW
+shprintf "This is blue text" COLOR BLUE
+shprintf "This is magenta text" COLOR MAGENTA
+shprintf "This is cyan text" COLOR CYAN
+shprintf "This is white text" COLOR WHITE
+
+echo "Testing shsetcolor and shresetcolor..."
+
+shsetcolor COLOR BLACK
+echo "This should be black"
+shsetcolor COLOR RED
+echo "This should be red"
+shsetcolor COLOR GREEN
+echo "This should be green"
+shsetcolor COLOR YELLOW
+echo "This should be yellow"
+shsetcolor COLOR BLUE
+echo "This should be blue"
+shsetcolor COLOR MAGENTA
+echo "This should be magenta"
+shsetcolor COLOR CYAN
+echo "This should be cyan"
+shsetcolor COLOR WHITE
+echo "This should be white"
+
+shresetcolor
+echo "This should be back to default"
+
+echo "Testing background colors with shprintf..."
+shprintf "White text on red background" COLOR BG_RED
+shresetcolor

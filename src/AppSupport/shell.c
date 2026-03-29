@@ -78,6 +78,7 @@ void shellPrintf(const char* color, const char* format, ...) {
     if (mode != SHELL_NO_COLORS) {
         printf("%s", SHELL_COLOR_RESET);
     }
+    fflush(stdout);
 }
 
 void shellSetColor(const char* color) {
@@ -88,11 +89,13 @@ void shellSetColor(const char* color) {
         } else {
             printf("%s", color);
         }
+        fflush(stdout);
     }
 }
 
 void shellResetColor() {
     if (getEnvColorMode() != SHELL_NO_COLORS) {
         printf("%s", SHELL_COLOR_RESET);
+        fflush(stdout);
     }
 }
