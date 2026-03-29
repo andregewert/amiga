@@ -53,6 +53,7 @@ dkms.conf
 
 # Build results
 build/
+build-test/
 
 # UAE
 *.uaem
