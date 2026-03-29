@@ -16,6 +16,9 @@ add_executable(cldir src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSuppor
 add_executable(mktemp src/Shelltools/mktemp.c src/AppSupport/filetools.c src/AppSupport/collections.c src/AppSupport/network.c)
 add_executable(img2ascii src/Shelltools/img2ascii.c src/AppSupport/image.c src/AppSupport/shell.c src/AppSupport/environment.c)
 add_executable(arch src/Shelltools/arch.c src/AppSupport/archive.c src/AppSupport/collections.c src/AppSupport/shell.c src/AppSupport/environment.c src/AppSupport/filetools.c)
+add_executable(shprintf src/Shelltools/shprintf.c src/AppSupport/shell.c src/AppSupport/environment.c)
+add_executable(shsetcolor src/Shelltools/shsetcolor.c src/AppSupport/shell.c src/AppSupport/environment.c)
+add_executable(shresetcolor src/Shelltools/shresetcolor.c src/AppSupport/shell.c src/AppSupport/environment.c)
 
 # Tests
 add_executable(archivetest src/AppSupport/archive.c src/AppSupportTests/archivetest.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c)
