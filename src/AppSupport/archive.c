@@ -41,13 +41,20 @@ Archive* archiveOpen(const char* filename) {
                 // Read Entries
                 Seek(file, archive->tocOffset, OFFSET_BEGINNING);
                 for (uint32_t i = 0; i < footer.entryCount; i++) {
-                    ArchiveEntry* entry = (ArchiveEntry*)malloc(sizeof(ArchiveEntry));
-                    if (Read(file, entry, sizeof(ArchiveEntry)) == sizeof(ArchiveEntry)) {
-                        listAppendElement(archive->entries, entry);
-                    } else {
-                        free(entry);
-                        break;
+                    ArchiveEntry* entry = (ArchiveEntry*)calloc(1, sizeof(ArchiveEntry));
+                    uint32_t nameLen = 0;
+                    if (Read(file, &nameLen, sizeof(uint32_t)) == sizeof(uint32_t)) {
+                        if (nameLen < ARCHIVE_MAX_FILENAME && Read(file, entry->fileName, nameLen) == nameLen) {
+                            entry->fileName[nameLen] = '\0';
+                            if (Read(file, &entry->size, sizeof(uint32_t)) == sizeof(uint32_t) &&
+                                Read(file, &entry->offset, sizeof(uint32_t)) == sizeof(uint32_t)) {
+                                listAppendElement(archive->entries, entry);
+                                continue;
+                            }
+                        }
                     }
+                    free(entry);
+                    break;
                 }
             }
         }
@@ -89,6 +96,11 @@ BOOL archiveFileExists(Archive* archive, const char* entryName) {
 
 static BOOL archiveAddOrReplaceFile(Archive* archive, const char* sourcePath, const char* entryName, BOOL replace) {
     if (!archive || !sourcePath || !entryName) return FALSE;
+
+    if (strlen(entryName) >= ARCHIVE_MAX_FILENAME) {
+        fprintf(stderr, "Filename too long: %s\n", entryName);
+        return FALSE;
+    }
 
     ArchiveEntry* existing = findEntry(archive, entryName);
     if (existing && !replace) return FALSE;
@@ -161,7 +173,12 @@ static BOOL archiveAddOrReplaceFile(Archive* archive, const char* sourcePath, co
     uint32_t count = 0;
     listElement* current = archive->entries->firstElement;
     while (current) {
-        Write(archFile, current->data, sizeof(ArchiveEntry));
+        ArchiveEntry* entry = (ArchiveEntry*)current->data;
+        uint32_t nameLen = strlen(entry->fileName);
+        Write(archFile, &nameLen, sizeof(uint32_t));
+        Write(archFile, entry->fileName, nameLen);
+        Write(archFile, &entry->size, sizeof(uint32_t));
+        Write(archFile, &entry->offset, sizeof(uint32_t));
         count++;
         current = current->nextElement;
     }

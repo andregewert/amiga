@@ -20,6 +20,7 @@
 #include <exec/types.h>
 #include "collections.h"
 
+#define ARCHIVE_MAX_FILENAME 256
 #define ARCHIVE_MAGIC "ARCH"
 #define FOOTER_MAGIC  "FOOT"
 
@@ -36,7 +37,7 @@ typedef struct {
 } ArchiveFooter;
 
 typedef struct {
-    char fileName[256];
+    char fileName[ARCHIVE_MAX_FILENAME];
     uint32_t size;
     uint32_t offset;
 } ArchiveEntry;

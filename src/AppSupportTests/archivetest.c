@@ -132,7 +132,19 @@ int main() {
     createDummyFile(file_with_path, content3);
     
     ASSERT_TRUE(archiveAddFile(arch, file_with_path, entry_with_path));
-    
+
+    printf("Testing maximum filename length...\n");
+    char long_filename[ARCHIVE_MAX_FILENAME + 10];
+    memset(long_filename, 'a', sizeof(long_filename) - 1);
+    long_filename[sizeof(long_filename) - 1] = '\0';
+    ASSERT_FALSE(archiveAddFile(arch, file1, long_filename));
+
+    char max_filename[ARCHIVE_MAX_FILENAME];
+    memset(max_filename, 'b', sizeof(max_filename) - 1);
+    max_filename[sizeof(max_filename) - 1] = '\0';
+    ASSERT_TRUE(archiveAddFile(arch, file1, max_filename));
+    ASSERT_TRUE(archiveFileExists(arch, max_filename));
+
     printf("Extracting %s to T:extracted_subdir/file3.txt...\n", entry_with_path);
     // This extraction should create T:extracted_subdir/
     ASSERT_TRUE(archiveExtractFile(arch, entry_with_path, "T:extracted_subdir/file3.txt"));
