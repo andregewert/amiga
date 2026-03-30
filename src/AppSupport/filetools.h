@@ -49,4 +49,18 @@ STRPTR createTempDir(const char* parent_dir, const char* prefix);
  */
 dictionary* dictFromIni(const char* filename);
 
+/**
+ * Returns the base name of a path (the filename).
+ * @param path The path to the file.
+ * @return The base name of the path. The caller is responsible for freeing the memory.
+ */
+STRPTR basename(const char* path);
+
+/**
+ * Returns the directory name of a path.
+ * @param path The path to the file.
+ * @return The directory name of the path. The caller is responsible for freeing the memory.
+ */
+STRPTR dirname(const char* path);
+
 #endif //APPSUPPORT_FILETOOLS_H

@@ -191,3 +191,145 @@ dictionary* dictFromIni(const char* filename) {
     fclose(file);
     return dict;
 }
+
+STRPTR basename(const char* path) {
+    if (path == NULL) return NULL;
+    if (path[0] == '\0') return (STRPTR)strdup("");
+
+    size_t len = strlen(path);
+    // Remove trailing slashes (but not if it's the only character)
+    while (len > 1 && path[len - 1] == '/') {
+        len--;
+    }
+
+    // Special case for "/"
+    if (len == 1 && path[0] == '/') {
+        return (STRPTR)strdup("/");
+    }
+
+    // Find the last separator (/ or :)
+    const char* last_sep = NULL;
+    for (size_t i = 0; i < len; i++) {
+        if (path[i] == '/' || path[i] == ':') {
+            last_sep = &path[i];
+        }
+    }
+
+    if (last_sep == NULL) {
+        // No separator found, the whole path is the basename
+        char* res = (char*)malloc(len + 1);
+        if (res) {
+            strncpy(res, path, len);
+            res[len] = '\0';
+        }
+        return (STRPTR)res;
+    }
+
+    // If it's a volume separator, we might want different behavior
+    // User wants basename("work:") = "work:"
+    
+    if (last_sep == &path[len - 1]) {
+        if (*last_sep == ':') {
+            // Volume separator at the end, return it as part of the basename
+            char* res = (char*)malloc(len + 1);
+            if (res) {
+                strncpy(res, path, len);
+                res[len] = '\0';
+            }
+            return (STRPTR)res;
+        }
+
+        // Separator '/' is at the end of the (possibly trimmed) string.
+        const char* prev_sep = NULL;
+        for (const char* p = path; p < last_sep; p++) {
+            if (*p == '/' || *p == ':') prev_sep = p;
+        }
+        
+        if (prev_sep == NULL) {
+            size_t final_len = last_sep - path;
+            char* res = (char*)malloc(final_len + 1);
+            if (res) {
+                strncpy(res, path, final_len);
+                res[final_len] = '\0';
+            }
+            return (STRPTR)res;
+        } else {
+            size_t final_len = last_sep - (prev_sep + 1);
+            char* res = (char*)malloc(final_len + 1);
+            if (res) {
+                strncpy(res, prev_sep + 1, final_len);
+                res[final_len] = '\0';
+            }
+            return (STRPTR)res;
+        }
+    }
+
+    size_t final_len = (path + len) - (last_sep + 1);
+    char* res = (char*)malloc(final_len + 1);
+    if (res) {
+        strncpy(res, last_sep + 1, final_len);
+        res[final_len] = '\0';
+    }
+    return (STRPTR)res;
+}
+
+STRPTR dirname(const char* path) {
+    if (path == NULL) return NULL;
+    if (path[0] == '\0') return (STRPTR)strdup("");
+
+    size_t len = strlen(path);
+    // If it's ".", Amiga dirname should be empty string
+    if (len == 1 && path[0] == '.') {
+        return (STRPTR)strdup("");
+    }
+    // Remove trailing slashes (but not if it's the only character)
+    while (len > 1 && path[len - 1] == '/') {
+        len--;
+    }
+
+    // Special case for "/"
+    if (len == 1 && path[0] == '/') {
+        return (STRPTR)strdup("/");
+    }
+
+    // Find the last separator
+    const char* last_sep = NULL;
+    int is_colon = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (path[i] == '/' || path[i] == ':') {
+            last_sep = &path[i];
+            is_colon = (path[i] == ':');
+        }
+    }
+
+    if (last_sep == NULL) {
+        return (STRPTR)strdup("");
+    }
+
+    if (last_sep == path && !is_colon) {
+        // Path is like "/foo" -> dirname is "/"
+        char* res = (char*)malloc(2);
+        if (res) {
+            res[0] = path[0];
+            res[1] = '\0';
+        }
+        return (STRPTR)res;
+    }
+
+    size_t dir_len = last_sep - path;
+    if (is_colon) {
+        // Amiga specific: "work:foo" -> "work:"
+        dir_len++; 
+    }
+
+    if (dir_len == 0 && !is_colon) {
+        return (STRPTR)strdup("");
+    }
+
+    char* res = (char*)malloc(dir_len + 1);
+    if (res) {
+        strncpy(res, path, dir_len);
+        res[dir_len] = '\0';
+    }
+    return (STRPTR)res;
+}
