@@ -19,13 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *strdup(const char* str) {
-    size_t len = strlen(str) + 1;
-    char* res = malloc(len);
-    if (res) memcpy(res, str, len);
-    return res;
-}
-
 // <editor-fold desc="Linked lists">
 
 linkedList* listCreate() {

@@ -16,11 +16,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <proto/dos.h>
-#include <proto/exec.h>
-#include "../AppSupport/archive.h"
-#include "../AppSupport/collections.h"
+#include "AppSupport/archive.h"
+#include "AppSupport/collections.h"
 
 int main(int argc, char** argv) {
     STRPTR template = (STRPTR)"ARCHIVE/A,COMMAND/A,FILES/M,TO/K";

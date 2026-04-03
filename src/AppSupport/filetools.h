@@ -63,4 +63,4 @@ STRPTR basename(const char* path);
  */
 STRPTR dirname(const char* path);
 
-#endif //APPSUPPORT_FILETOOLS_H
+#endif

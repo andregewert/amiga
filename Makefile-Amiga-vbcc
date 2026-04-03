@@ -10,7 +10,7 @@ BUILDDIR = build-vbcc
 # Compiler options
 CCBIN = vc
 CCOPTS = -c99
-LIBS = -lauto
+LIBS = -lamiga -lauto
 MATHLIB = -lmsoft
 
 CC = $(CCBIN) $(CCOPTS) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS)
@@ -33,19 +33,19 @@ tests: archivetest filetoolstest shelltest
 # Shell tools
 
 arch: prepare src/Shelltools/arch.c src/AppSupport/archive.h src/AppSupport/archive.c src/AppSupport/collections.h src/AppSupport/collections.c
-	$(CC) src/Shelltools/arch.c src/AppSupport/archive.c src/AppSupport/collections.c -o $(BUILDDIR)/arch
+	$(CC) src/Shelltools/arch.c ${BUILDDIR}/archive.o ${BUILDDIR}/collections.o -o $(BUILDDIR)/arch
 
-cldir: prepare src/Shelltools/cldir.c src/AppSupport/shell.h src/AppSupport/shell.c
-	$(CC) src/Shelltools/cldir.c src/AppSupport/shell.c -o $(BUILDDIR)/cldir
+cldir: prepare src/Shelltools/cldir.c src/AppSupport/shell.h src/AppSupport/shell.c src/AppSupport/environment.h src/AppSupport/environment.c
+	$(CC) src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSupport/environment.c -o $(BUILDDIR)/cldir
 
 fetch: prepare src/Shelltools/fetch.c src/AppSupport/network.h src/AppSupport/network.c src/AppSupport/collections.h src/AppSupport/collections.c
 	$(CC) src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c -o $(BUILDDIR)/fetch
 
-img2ascii: prepare src/Shelltools/img2ascii.c src/AppSupport/image.h src/AppSupport/image.c
-    $(CC) src/Shelltools/img2ascii.c src/AppSupport/image.c -o $(BUILDDIR)/img2ascii
+img2ascii: prepare src/Shelltools/img2ascii.c src/AppSupport/image.h src/AppSupport/image.c src/AppSupport/environment.h src/AppSupport/environment.c src/AppSupport/shell.h src/AppSupport/shell.c
+	$(CC) ${MATHLIB} src/Shelltools/img2ascii.c src/AppSupport/image.c src/AppSupport/environment.c src/AppSupport/shell.c -o $(BUILDDIR)/img2ascii
 
-mktemp: prepare src/Shelltools/mktemp.c src/AppSupport/filetools.h src/AppSupport/filetools.c
-	$(CC) src/Shelltools/mktemp.c src/AppSupport/collections.c -o $(BUILDDIR)/mktemp
+mktemp: prepare src/Shelltools/mktemp.c src/AppSupport/filetools.h src/AppSupport/filetools.c src/AppSupport/collections.h src/AppSupport/collections.c
+	$(CC) src/Shelltools/mktemp.c ${BUILDDIR}/filetools.o ${BUILDDIR}/collections.o -o ${BUILDDIR}/mktemp
 
 shprintf: prepare src/Shelltools/shprintf.c src/AppSupport/shell.h src/AppSupport/shell.c
 	$(CC) src/Shelltools/shprintf.c src/AppSupport/shell.c -o $(BUILDDIR)/shprintf

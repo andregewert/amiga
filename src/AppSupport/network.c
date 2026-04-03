@@ -32,13 +32,6 @@ struct Library *AmiSSLBase = NULL;
 struct Library *AmiSSLExtBase = NULL;
 struct Library *UtilityBase = NULL;
 
-static char *strdup(const char* str) {
-    size_t len = strlen(str) + 1;
-    char* res = malloc(len);
-    if (res) memcpy(res, str, len);
-    return res;
-}
-
 static void closeSocketLibrary();
 
 static bool openSocketLibrary() {
@@ -256,7 +249,7 @@ static FetchResponse* internalFetch(ParsedUrl* p, bool followRedirects, int dept
     char* buffer = malloc(4096);
     size_t totalRead = 0;
     size_t bufferSize = 4096;
-    int n;
+    ssize_t n;
 
     while (1) {
         if (isHttps) {

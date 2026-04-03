@@ -16,13 +16,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <proto/dos.h>
-#include <proto/exec.h>
 #include <dos/dos.h>
 #include <dos/dosextens.h>
 #include <dos/datetime.h>
-#include "../AppSupport/shell.h"
+#include "AppSupport/shell.h"
 
 static int isInfoFile(const char* name) {
     size_t len = strlen(name);

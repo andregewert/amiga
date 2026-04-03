@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <proto/dos.h>
-#include "../AppSupport/network.h"
+#include "AppSupport/network.h"
 
 int main(int argc, char** argv) {
     STRPTR template = (STRPTR)"URL/A,TO/K,FOLLOW/S";
