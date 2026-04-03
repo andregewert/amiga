@@ -54,6 +54,7 @@ dkms.conf
 # Build results
 build/
 build-test/
+build-vbcc/
 
 # UAE
 *.uaem

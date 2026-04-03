@@ -26,7 +26,6 @@
 #define APPSUPPORT_COLLECTIONS_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <exec/types.h>
 
 // <editor-fold desc="Linked lists">

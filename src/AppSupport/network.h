@@ -16,10 +16,11 @@
 #ifndef APPSUPPORT_NETWORK_H
 #define APPSUPPORT_NETWORK_H
 
+#include "collections.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <exec/types.h>
-#include "collections.h"
 
 typedef struct FetchResponse {
     uint32_t statusCode;

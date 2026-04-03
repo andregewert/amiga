@@ -16,28 +16,28 @@
 #include "network.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
 
 #include <proto/exec.h>
 #include <proto/dos.h>
-#include <sys/socket.h>
+
 #include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <proto/bsdsocket.h>
+#include <proto/socket.h>
+#include <amissl/amissl.h>
 #include <libraries/amisslmaster.h>
 #include <proto/amisslmaster.h>
-#include <proto/amissl.h>
-#include <amissl/amissl.h>
 
-// Use __attribute__((cleanup)) if it's there? No, just stick to standard C99/Amiga practices.
 struct Library *SocketBase = NULL;
 struct Library *AmiSSLMasterBase = NULL;
 struct Library *AmiSSLBase = NULL;
+struct Library *AmiSSLExtBase = NULL;
 struct Library *UtilityBase = NULL;
+
+static char *strdup(const char* str) {
+    size_t len = strlen(str) + 1;
+    char* res = malloc(len);
+    if (res) memcpy(res, str, len);
+    return res;
+}
 
 static void closeSocketLibrary();
 
@@ -256,7 +256,7 @@ static FetchResponse* internalFetch(ParsedUrl* p, bool followRedirects, int dept
     char* buffer = malloc(4096);
     size_t totalRead = 0;
     size_t bufferSize = 4096;
-    ssize_t n;
+    int n;
 
     while (1) {
         if (isHttps) {

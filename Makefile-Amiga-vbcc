@@ -1,0 +1,69 @@
+# Directories
+#POSIXLIB = dh2:SDK/PosixLib
+NETINCLUDE = dh2:SDK/NDK32/SANA+RoadshowTCP-IP/netinclude
+AMISSL = dh2:SDK/AmiSSL/Developer
+
+LIBDIRS = -L${AMISSL}/lib/AmigaOS3
+INCLUDEDIRS = -I${AMISSL}/include -I${NETINCLUDE} -I${NDK_INC}
+BUILDDIR = build-vbcc
+
+# Compiler options
+CCBIN = vc
+CCOPTS = -c99
+LIBS = -lauto
+MATHLIB = -lmsoft
+
+CC = $(CCBIN) $(CCOPTS) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS)
+
+.PHONY: all clean prepare
+
+all: shelltools tests
+
+prepare:
+	makedir $(BUILDDIR)
+
+clean:
+	delete all $(BUILDDIR)
+
+shelltools: arch cldir fetch img2ascii mktemp shprintf shresetcolor shsetcolor
+
+tests: archivetest filetoolstest shelltest
+
+
+# Shell tools
+
+arch: prepare src/Shelltools/arch.c src/AppSupport/archive.h src/AppSupport/archive.c src/AppSupport/collections.h src/AppSupport/collections.c
+	$(CC) src/Shelltools/arch.c src/AppSupport/archive.c src/AppSupport/collections.c -o $(BUILDDIR)/arch
+
+cldir: prepare src/Shelltools/cldir.c src/AppSupport/shell.h src/AppSupport/shell.c
+	$(CC) src/Shelltools/cldir.c src/AppSupport/shell.c -o $(BUILDDIR)/cldir
+
+fetch: prepare src/Shelltools/fetch.c src/AppSupport/network.h src/AppSupport/network.c src/AppSupport/collections.h src/AppSupport/collections.c
+	$(CC) src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c -o $(BUILDDIR)/fetch
+
+img2ascii: prepare src/Shelltools/img2ascii.c src/AppSupport/image.h src/AppSupport/image.c
+    $(CC) src/Shelltools/img2ascii.c src/AppSupport/image.c -o $(BUILDDIR)/img2ascii
+
+mktemp: prepare src/Shelltools/mktemp.c src/AppSupport/filetools.h src/AppSupport/filetools.c
+	$(CC) src/Shelltools/mktemp.c src/AppSupport/collections.c -o $(BUILDDIR)/mktemp
+
+shprintf: prepare src/Shelltools/shprintf.c src/AppSupport/shell.h src/AppSupport/shell.c
+	$(CC) src/Shelltools/shprintf.c src/AppSupport/shell.c -o $(BUILDDIR)/shprintf
+
+shresetcolor: prepare src/Shelltools/shresetcolor.c src/AppSupport/shell.h src/AppSupport/shell.c
+	$(CC) src/Shelltools/shresetcolor.c src/AppSupport/shell.c -o $(BUILDDIR)/shresetcolor
+
+shsetcolor: prepare src/Shelltools/shsetcolor.c src/AppSupport/shell.h src/AppSupport/shell.c
+	$(CC) src/Shelltools/shsetcolor.c src/AppSupport/shell.c -o $(BUILDDIR)/shsetcolor
+
+
+# App support tests
+
+archivetest: prepare src/AppSupportTests/archivetest.c src/AppSupport/archive.h src/AppSupport/archive.c src/AppSupport/collections.h src/AppSupport/collections.c src/AppSupport/testutils.h src/AppSupport/testutils.c
+	$(CC) src/AppSupportTests/archivetest.c src/AppSupport/archive.c src/AppSupport/collections.c src/AppSupport/testutils.c -o $(BUILDDIR)/archivetest
+
+filetoolstest: prepare src/AppSupportTests/filetoolstest.c src/AppSupport/filetools.h src/AppSupport/filetools.c src/AppSupport/testutils.h src/AppSupport/testutils.c
+	$(CC) src/AppSupportTests/filetoolstest.c src/AppSupport/filetools.c src/AppSupport/testutils.c -o $(BUILDDIR)/filetoolstest
+
+shelltest: prepare src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/shell.c src/AppSupport/collections.c src/AppSupport/filetools.c
+	$(CC) src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/shell.c src/AppSupport/collections.c src/AppSupport/filetools.c -o $(BUILDDIR)/shelltest
