@@ -26,57 +26,48 @@
 #include <libraries/amisslmaster.h>
 #include <proto/amisslmaster.h>
 
+#ifdef __VBCC__
+    __entry char StackCookie[] = "$STACK:20480";
+#endif
+#ifdef __GNUC__
+    __attribute__((used)) char StackCookie[] = "$STACK:20480";
+#endif
+
 struct Library *SocketBase = NULL;
 struct Library *AmiSSLMasterBase = NULL;
 struct Library *AmiSSLBase = NULL;
 struct Library *AmiSSLExtBase = NULL;
-struct Library *UtilityBase = NULL;
 
-static void closeSocketLibrary();
+static long ErrNo=0;
+static long HErrNo=0;
 
 static bool openSocketLibrary() {
-    static bool atexit_registered = false;
-    if (!atexit_registered) {
-        atexit(closeSocketLibrary);
-        atexit_registered = true;
-    }
-
-    if (!UtilityBase) {
-        UtilityBase = OpenLibrary("utility.library", 0);
-    }
-
     if (!SocketBase) {
         SocketBase = OpenLibrary("bsdsocket.library", 4);
         if (!SocketBase) return false;
     }
 
+    AmiSSLMasterBase = OpenLibrary("amisslmaster.library", AMISSLMASTER_MIN_VERSION);
     if (!AmiSSLMasterBase) {
-        AmiSSLMasterBase = OpenLibrary("amisslmaster.library", AMISSLMASTER_MIN_VERSION);
-        if (AmiSSLMasterBase) {
-            if (InitAmiSSLMaster(AMISSL_V11x, TRUE)) {
-                AmiSSLBase = OpenAmiSSL();
-                if (AmiSSLBase) {
-                    if (InitAmiSSL(AmiSSL_ErrNoPtr, (uintptr_t)&errno,
-                                   AmiSSL_SocketBase, (uintptr_t)SocketBase,
-                                   TAG_DONE) != 0) {
-                        CloseAmiSSL();
-                        AmiSSLBase = NULL;
-                        CloseLibrary(AmiSSLMasterBase);
-                        AmiSSLMasterBase = NULL;
-                    } else {
-                        OPENSSL_init_ssl(OPENSSL_INIT_SSL_DEFAULT, NULL);
-                    }
-                } else {
-                    CloseLibrary(AmiSSLMasterBase);
-                    AmiSSLMasterBase = NULL;
-                }
-            } else {
-                CloseLibrary(AmiSSLMasterBase);
-                AmiSSLMasterBase = NULL;
-            }
-        }
+        printf( "Unable to open amisslmaster.library\n" );
+        return false;
     }
 
+    SocketBaseTags(
+        SBTM_SETVAL(SBTC_ERRNOLONGPTR), (int)&ErrNo,
+        SBTM_SETVAL(SBTC_HERRNOLONGPTR), (int)&HErrNo,
+        TAG_END
+    );
+
+    OpenAmiSSLTags(
+        AMISSL_CURRENT_VERSION,
+        AmiSSL_UsesOpenSSLStructs, FALSE,
+        AmiSSL_GetAmiSSLBase, (int)&AmiSSLBase,
+        AmiSSL_GetAmiSSLExtBase, (int)&AmiSSLExtBase,
+        AmiSSL_SocketBase, (int)SocketBase,
+        AmiSSL_ErrNoPtr, (int)&ErrNo,
+        TAG_END
+    );
     return true;
 }
 
@@ -93,10 +84,6 @@ static void closeSocketLibrary() {
     if (SocketBase) {
         CloseLibrary(SocketBase);
         SocketBase = NULL;
-    }
-    if (UtilityBase) {
-        CloseLibrary(UtilityBase);
-        UtilityBase = NULL;
     }
 }
 
@@ -175,6 +162,7 @@ FetchResponse* fetchUrl(const char* url, bool followRedirects) {
     }
 
     freeParsedUrl(p);
+    closeSocketLibrary();
     return res;
 }
 
