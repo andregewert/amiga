@@ -13,11 +13,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "AppSupport/filetools.h"
-#include "AppSupport/testutils.h"
+#include "../AppSupport/filetools.h"
+#include "../AppSupport/testutils.h"
 
 int main() {
     testInit("FileTools Path Extraction Tests");

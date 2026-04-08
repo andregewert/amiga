@@ -17,9 +17,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <proto/dos.h>
-#include "AppSupport/archive.h"
-#include "AppSupport/collections.h"
-#include "AppSupport/testutils.h"
+#include "../AppSupport/archive.h"
+#include "../AppSupport/collections.h"
+#include "../AppSupport/testutils.h"
 
 void createDummyFile(const char* filename, const char* content) {
     BPTR file = Open((STRPTR)filename, MODE_NEWFILE);

@@ -1,26 +1,42 @@
 # Directories
-#POSIXLIB = dh2:SDK/PosixLib
+
+POSIXLIB = dh2:SDK/PosixLib
 NETINCLUDE = dh2:SDK/NDK32/SANA+RoadshowTCP-IP/netinclude
 AMISSL = dh2:SDK/AmiSSL/Developer
+LIBDIRS = -L$(AMISSL)/lib/AmigaOS3 -L$(POSIXLIB)/AmigaOS3
+INCLUDEDIRS = -I$(NETINCLUDE) -I$(AMISSL)/include -I$(POSIXLIB)/include -I$(NDK_INC)
 
-LIBDIRS = -L${AMISSL}/lib/AmigaOS3
-INCLUDEDIRS = -I${AMISSL}/include -I${NETINCLUDE} -I${NDK_INC}
-BUILDDIR = build-vbcc
 
 # Compiler options
+
 CCBIN = vc
 CCOPTS = -c99
-LIBS = -lamiga -lauto
+CPU = 68000
+FPU = soft
+LIBS = -lposix -lamiga -lauto
 MATHLIB = -lmsoft
 
-CC = $(CCBIN) $(CCOPTS) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS)
+CC = $(CCBIN) $(CCOPTS) -cpu=$(CPU) -fpu=$(FPU) $(INCLUDEDIRS) $(LIBDIRS) $(LIBS)
+
+# Target directories
+
+BUILDDIR = build-vbcc
+DISTDIR = $(BUILDDIR)/$(CPU)-$(FPU)
+OBJDIR = $(BUILDDIR)/$(CPU)-$(FPU)/obj
+TESTBINDIR = $(BUILDDIR)/$(CPU)-$(FPU)/tests
+
+
+# Make rules
 
 .PHONY: all clean prepare
 
-all: shelltools tests
+all: shelltools tests scripts
 
 prepare:
 	makedir $(BUILDDIR)
+	makedir $(DISTDIR)
+	makedir $(OBJDIR)
+	makedir $(TESTBINDIR)
 
 clean:
 	delete all $(BUILDDIR)
@@ -29,41 +45,50 @@ shelltools: arch cldir fetch img2ascii mktemp shprintf shresetcolor shsetcolor
 
 tests: archivetest filetoolstest shelltest
 
+scripts: prepare
+	cp src/ShellScripts/*.shell $(TESTBINDIR)
+
+APPSUPPORTSRCS=$(wildcard src/AppSupport/*.c)
+APPSUPPORTOBJS=$(APPSUPPORTSRCS:src/AppSupport/%.c=$(OBJDIR)/.o%)
+
+%.o: src/AppSupport/%.c src/AppSupport/%.h
+	$(CC) -c -o $(OBJDIR)/$@ $<
+
 
 # Shell tools
 
-arch: prepare src/Shelltools/arch.c src/AppSupport/archive.h src/AppSupport/archive.c src/AppSupport/collections.h src/AppSupport/collections.c
-	$(CC) src/Shelltools/arch.c ${BUILDDIR}/archive.o ${BUILDDIR}/collections.o -o $(BUILDDIR)/arch
+arch: prepare src/Shelltools/arch.c archive.o collections.o
+	$(CC) src/Shelltools/arch.c $(OBJDIR)/archive.o $(OBJDIR)/collections.o -o $(DISTDIR)/arch
 
-cldir: prepare src/Shelltools/cldir.c src/AppSupport/shell.h src/AppSupport/shell.c src/AppSupport/environment.h src/AppSupport/environment.c
-	$(CC) src/Shelltools/cldir.c src/AppSupport/shell.c src/AppSupport/environment.c -o $(BUILDDIR)/cldir
+cldir: prepare src/Shelltools/cldir.c shell.o environment.o
+	$(CC) src/Shelltools/cldir.c $(OBJDIR)/shell.o $(OBJDIR)/environment.o -o $(DISTDIR)/cldir
 
-fetch: prepare src/Shelltools/fetch.c src/AppSupport/network.h src/AppSupport/network.c src/AppSupport/collections.h src/AppSupport/collections.c
-	$(CC) src/Shelltools/fetch.c src/AppSupport/network.c src/AppSupport/collections.c -o $(BUILDDIR)/fetch
+fetch: prepare src/Shelltools/fetch.c network.o collections.o
+	$(CC) src/Shelltools/fetch.c $(OBJDIR)/network.o $(OBJDIR)/collections.o -o $(DISTDIR)/fetch
 
-img2ascii: prepare src/Shelltools/img2ascii.c src/AppSupport/image.h src/AppSupport/image.c src/AppSupport/environment.h src/AppSupport/environment.c src/AppSupport/shell.h src/AppSupport/shell.c
-	$(CC) ${MATHLIB} src/Shelltools/img2ascii.c src/AppSupport/image.c src/AppSupport/environment.c src/AppSupport/shell.c -o $(BUILDDIR)/img2ascii
+img2ascii: prepare src/Shelltools/img2ascii.c image.o environment.o shell.o
+	$(CC) ${MATHLIB} src/Shelltools/img2ascii.c $(OBJDIR)/image.o $(OBJDIR)/environment.o $(OBJDIR)/shell.o -o $(DISTDIR)/img2ascii
 
-mktemp: prepare src/Shelltools/mktemp.c src/AppSupport/filetools.h src/AppSupport/filetools.c src/AppSupport/collections.h src/AppSupport/collections.c
-	$(CC) src/Shelltools/mktemp.c ${BUILDDIR}/filetools.o ${BUILDDIR}/collections.o -o ${BUILDDIR}/mktemp
+mktemp: prepare src/Shelltools/mktemp.c filetools.o collections.o
+	$(CC) src/Shelltools/mktemp.c $(OBJDIR)/filetools.o $(OBJDIR)/collections.o -o ${DISTDIR}/mktemp
 
-shprintf: prepare src/Shelltools/shprintf.c src/AppSupport/shell.h src/AppSupport/shell.c
-	$(CC) src/Shelltools/shprintf.c src/AppSupport/shell.c -o $(BUILDDIR)/shprintf
+shprintf: prepare src/Shelltools/shprintf.c shell.o environment.o
+	$(CC) src/Shelltools/shprintf.c $(OBJDIR)/shell.o $(OBJDIR)/environment.o  -o $(DISTDIR)/shprintf
 
-shresetcolor: prepare src/Shelltools/shresetcolor.c src/AppSupport/shell.h src/AppSupport/shell.c
-	$(CC) src/Shelltools/shresetcolor.c src/AppSupport/shell.c -o $(BUILDDIR)/shresetcolor
+shresetcolor: prepare src/Shelltools/shresetcolor.c shell.o environment.o
+	$(CC) src/Shelltools/shresetcolor.c $(OBJDIR)/shell.o $(OBJDIR)/environment.o -o $(DISTDIR)/shresetcolor
 
-shsetcolor: prepare src/Shelltools/shsetcolor.c src/AppSupport/shell.h src/AppSupport/shell.c
-	$(CC) src/Shelltools/shsetcolor.c src/AppSupport/shell.c -o $(BUILDDIR)/shsetcolor
+shsetcolor: prepare src/Shelltools/shsetcolor.c shell.o environment.o
+	$(CC) src/Shelltools/shsetcolor.c $(OBJDIR)/shell.o $(OBJDIR)/environment.o -o $(DISTDIR)/shsetcolor
 
 
 # App support tests
 
-archivetest: prepare src/AppSupportTests/archivetest.c src/AppSupport/archive.h src/AppSupport/archive.c src/AppSupport/collections.h src/AppSupport/collections.c src/AppSupport/testutils.h src/AppSupport/testutils.c
-	$(CC) src/AppSupportTests/archivetest.c src/AppSupport/archive.c src/AppSupport/collections.c src/AppSupport/testutils.c -o $(BUILDDIR)/archivetest
+archivetest: prepare src/AppSupportTests/archivetest.c archive.o collections.o testutils.o shell.o environment.o
+	$(CC) src/AppSupportTests/archivetest.c $(OBJDIR)/archive.o $(OBJDIR)/collections.o $(OBJDIR)/testutils.o $(OBJDIR)/shell.o $(OBJDIR)/environment.o -o $(TESTBINDIR)/archivetest
 
-filetoolstest: prepare src/AppSupportTests/filetoolstest.c src/AppSupport/filetools.h src/AppSupport/filetools.c src/AppSupport/testutils.h src/AppSupport/testutils.c
-	$(CC) src/AppSupportTests/filetoolstest.c src/AppSupport/filetools.c src/AppSupport/testutils.c -o $(BUILDDIR)/filetoolstest
+filetoolstest: prepare src/AppSupportTests/filetoolstest.c filetools.o testutils.o shell.o environment.o collections.o
+	$(CC) src/AppSupportTests/filetoolstest.c $(OBJDIR)/filetools.o $(OBJDIR)/testutils.o $(OBJDIR)/shell.o $(OBJDIR)/environment.o $(OBJDIR)/collections.o -o $(TESTBINDIR)/filetoolstest
 
-shelltest: prepare src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/shell.c src/AppSupport/collections.c src/AppSupport/filetools.c
-	$(CC) src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/shell.c src/AppSupport/collections.c src/AppSupport/filetools.c -o $(BUILDDIR)/shelltest
+shelltest: prepare src/AppSupportTests/shelltest.c environment.o shell.o collections.o filetools.o
+	$(CC) src/AppSupportTests/shelltest.c $(OBJDIR)/environment.o $(OBJDIR)/shell.o $(OBJDIR)/collections.o $(OBJDIR)/filetools.o -o $(TESTBINDIR)/shelltest

@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <proto/dos.h>
-#include "AppSupport/shell.h"
+#include "../AppSupport/shell.h"
 
 int main(int argc, char** argv) {
     shellResetColor();

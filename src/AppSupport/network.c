@@ -20,7 +20,6 @@
 #include <proto/exec.h>
 #include <proto/dos.h>
 
-#include <netdb.h>
 #include <proto/socket.h>
 #include <amissl/amissl.h>
 #include <libraries/amisslmaster.h>

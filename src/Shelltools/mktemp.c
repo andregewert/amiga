@@ -18,7 +18,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <proto/dos.h>
-#include "AppSupport/filetools.h"
+#include "../AppSupport/filetools.h"
 
 int main(int argc, char** argv) {
     STRPTR template = (STRPTR)"DIRECTORY,PREFIX,D/S";

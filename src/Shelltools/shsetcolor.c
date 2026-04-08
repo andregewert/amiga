@@ -18,7 +18,7 @@
 #include <string.h>
 #include <strings.h>
 #include <proto/dos.h>
-#include "AppSupport/shell.h"
+#include "../AppSupport/shell.h"
 
 static const char* getColor(const char* name) {
     if (!name) return SHELL_COLOR_RESET;

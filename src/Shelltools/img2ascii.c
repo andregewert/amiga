@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-#include "AppSupport/image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <proto/dos.h>
+#include "../AppSupport/image.h"
 
 int main(int argc, char* argv[]) {
     STRPTR template = (STRPTR)"FILE/A,WIDTH/N";
