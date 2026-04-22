@@ -119,6 +119,21 @@ BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* des
 BOOL archiveExtractAll(Archive* archive, const char* destDir);
 
 /**
+ * Deletes a file from the archive.
+ * @param archive The archive handle.
+ * @param entryName The name of the file in the archive to delete.
+ * @return TRUE if successful, FALSE otherwise.
+ */
+BOOL archiveDeleteFile(Archive* archive, const char* entryName);
+
+/**
+ * Refreshes the Table of Contents from the disk file.
+ * @param archive The archive handle.
+ * @return TRUE if successful, FALSE otherwise.
+ */
+BOOL archiveRefresh(Archive* archive);
+
+/**
  * Adds a directory recursively to the archive.
  * @param archive The archive handle.
  * @param sourceDir The local directory path to add.

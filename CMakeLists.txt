@@ -24,6 +24,7 @@ add_executable(shresetcolor src/Shelltools/shresetcolor.c src/AppSupport/shell.c
 add_executable(archivetest src/AppSupport/archive.c src/AppSupportTests/archivetest.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c)
 add_executable(shelltest src/AppSupportTests/shelltest.c src/AppSupport/environment.c src/AppSupport/collections.c src/AppSupport/filetools.c src/AppSupport/shell.c src/AppSupport/network.c)
 add_executable(filetoolstest src/AppSupportTests/filetoolstest.c src/AppSupport/filetools.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c src/AppSupport/collections.c)
+add_executable(archvfstest src/AppSupport/archvfs.c src/AppSupport/archive.c src/AppSupportTests/archvfstest.c src/AppSupport/collections.c src/AppSupport/testutils.c src/AppSupport/shell.c src/AppSupport/environment.c src/AppSupport/filetools.c src/AppSupport/network.c)
 
 # Building blocks
 #add_executable(gfxfunctions src/BuildingBlocks/gfxfunctions.c)

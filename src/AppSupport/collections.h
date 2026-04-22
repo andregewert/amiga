@@ -150,6 +150,14 @@ void listForeach(linkedList* list, listElementCallback callback);
 void listDispose(linkedList* list);
 
 /**
+ * Removes all elements from the linked list. 
+ * Note that the linked elements' data memory will not be freed. 
+ * This has to be done by the caller before calling this function!
+ * @param list Pointer to the linked list.
+ */
+void listClear(linkedList* list);
+
+/**
  * Swaps two elements within the given list.
  * The current implementation is surely not the best / the fastest, so it should be improved
  * some time.

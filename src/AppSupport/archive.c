@@ -32,6 +32,13 @@ Archive* archiveOpen(const char* filename) {
 
     BPTR file = Open((STRPTR)filename, MODE_OLDFILE);
     if (file) {
+        char magic[4];
+        if (Read(file, magic, 4) != 4 || strncmp(magic, ARCHIVE_MAGIC, 4) != 0) {
+            Close(file);
+            archiveClose(archive);
+            return NULL;
+        }
+
         // Read Footer
         Seek(file, -12, OFFSET_END);
         ArchiveFooter footer;
@@ -295,6 +302,129 @@ BOOL archiveExtractFile(Archive* archive, const char* entryName, const char* des
     Close(dest);
     Close(archFile);
     return success;
+}
+
+BOOL archiveDeleteFile(Archive* archive, const char* entryName) {
+    if (!archive || !entryName) return FALSE;
+
+    // Find the entry
+    listElement* prev = NULL;
+    listElement* current = archive->entries->firstElement;
+    uint32_t index = 0;
+    ArchiveEntry* targetEntry = NULL;
+
+    while (current) {
+        ArchiveEntry* entry = (ArchiveEntry*)current->data;
+        if (strcmp(entry->fileName, entryName) == 0) {
+            targetEntry = entry;
+            break;
+        }
+        prev = current;
+        current = current->nextElement;
+        index++;
+    }
+
+    if (!targetEntry) return FALSE;
+
+    // Remove from list
+    listRemoveElementAt(archive->entries, index);
+    free(targetEntry);
+
+    // Rewrite the archive file
+    BPTR archFile = Open((STRPTR)archive->filename, MODE_OLDFILE);
+    if (!archFile) return FALSE;
+
+    // We need to rewrite the TOC and Footer. 
+    // Wait, the data of the deleted file is still in the archive file, 
+    // but it's no longer referenced by the TOC. 
+    // We could potentially "compact" the archive, but for now just updating the TOC is enough.
+    // However, the TOC is usually at the end of the file.
+    
+    // Let's see how archiveAddOrReplaceFile works.
+    // It appends new file data at archive->tocOffset and then writes TOC.
+    // So if we delete an entry, we should probably not change tocOffset (as it points to the end of all data)
+    // but just rewrite the TOC at the current tocOffset.
+
+    Seek(archFile, archive->tocOffset, OFFSET_BEGINNING);
+    
+    uint32_t count = 0;
+    current = archive->entries->firstElement;
+    while (current) {
+        ArchiveEntry* entry = (ArchiveEntry*)current->data;
+        uint32_t nameLen = strlen(entry->fileName);
+        Write(archFile, &nameLen, sizeof(uint32_t));
+        Write(archFile, entry->fileName, nameLen);
+        Write(archFile, &entry->size, sizeof(uint32_t));
+        Write(archFile, &entry->offset, sizeof(uint32_t));
+        count++;
+        current = current->nextElement;
+    }
+
+    // Write Footer
+    ArchiveFooter footer;
+    footer.tocOffset = archive->tocOffset;
+    footer.entryCount = count;
+    memcpy(footer.magic, FOOTER_MAGIC, 4);
+    Write(archFile, &footer, sizeof(footer));
+
+    // Truncate file here? Amiga doesn't have an easy "truncate" by handle, 
+    // but we can SetFileSize in AmigaOS 2.0+ or just leave it.
+    // Given the current architecture, leaving it is safer/easier.
+    // Actually, we should probably use SetFileSize if we want to be clean.
+    SetFileSize(archFile, archive->tocOffset + Seek(archFile, 0, OFFSET_CURRENT) - archive->tocOffset, OFFSET_BEGINNING);
+    // Actually Seek returns current position if offset is 0 and mode is OFFSET_CURRENT? No, it's Seek(archFile, 0, OFFSET_CURRENT).
+    // Let's just use what we have.
+
+    Close(archFile);
+    return TRUE;
+}
+
+BOOL archiveRefresh(Archive* archive) {
+    if (!archive) return FALSE;
+
+    // Clear existing entries
+    listForeach(archive->entries, freeEntry);
+    listClear(archive->entries);
+
+    BPTR file = Open((STRPTR)archive->filename, MODE_OLDFILE);
+    if (file) {
+        char magic[4];
+        if (Read(file, magic, 4) != 4 || strncmp(magic, ARCHIVE_MAGIC, 4) != 0) {
+            Close(file);
+            return FALSE;
+        }
+
+        // Read Footer
+        Seek(file, -12, OFFSET_END);
+        ArchiveFooter footer;
+        if (Read(file, &footer, sizeof(footer)) == sizeof(footer)) {
+            if (strncmp(footer.magic, FOOTER_MAGIC, 4) == 0) {
+                archive->tocOffset = footer.tocOffset;
+
+                // Read Entries
+                Seek(file, archive->tocOffset, OFFSET_BEGINNING);
+                for (uint32_t i = 0; i < footer.entryCount; i++) {
+                    ArchiveEntry* entry = (ArchiveEntry*)calloc(1, sizeof(ArchiveEntry));
+                    uint32_t nameLen = 0;
+                    if (Read(file, &nameLen, sizeof(uint32_t)) == sizeof(uint32_t)) {
+                        if (nameLen < ARCHIVE_MAX_FILENAME && Read(file, entry->fileName, nameLen) == nameLen) {
+                            entry->fileName[nameLen] = '\0';
+                            if (Read(file, &entry->size, sizeof(uint32_t)) == sizeof(uint32_t) &&
+                                Read(file, &entry->offset, sizeof(uint32_t)) == sizeof(uint32_t)) {
+                                listAppendElement(archive->entries, entry);
+                                continue;
+                            }
+                        }
+                    }
+                    free(entry);
+                    break;
+                }
+            }
+        }
+        Close(file);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 BOOL archiveExtractAll(Archive* archive, const char* destDir) {

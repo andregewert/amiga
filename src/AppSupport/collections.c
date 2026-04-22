@@ -143,6 +143,13 @@ void listForeach(linkedList* list, listElementCallback callback) {
 void listDispose(linkedList* list) {
     if (list == NULL) return;
 
+    listClear(list);
+    free(list);
+}
+
+void listClear(linkedList* list) {
+    if (list == NULL) return;
+
     listElement* node = list->firstElement;
     listElement* dispose = NULL;
 
@@ -153,8 +160,8 @@ void listDispose(linkedList* list) {
         dispose->nextElement = NULL;
         free(dispose);
     }
-
-    free(list);
+    list->firstElement = NULL;
+    list->length = 0;
 }
 
 void listSwapElementsAt(linkedList* list, uint32_t i1, uint32_t i2) {
