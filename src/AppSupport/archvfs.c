@@ -67,17 +67,73 @@ static void freeSearchPathEntry(listElement* el) {
     free(entry);
 }
 
+static BOOL deleteRecursivePhysical(const char* fullPath) {
+    BPTR lock = Lock((STRPTR)fullPath, SHARED_LOCK);
+    if (!lock) return FALSE;
+
+    struct FileInfoBlock* fib = AllocDosObject(DOS_FIB, NULL);
+    if (!fib) {
+        UnLock(lock);
+        return FALSE;
+    }
+
+    BOOL success = TRUE;
+    if (Examine(lock, fib)) {
+        if (fib->fib_DirEntryType >= 0) {
+            // It's a directory, iterate over its contents
+            while (ExNext(lock, fib)) {
+                char subPath[512];
+                snprintf(subPath, sizeof(subPath), "%s/%s", fullPath, fib->fib_FileName);
+                if (!deleteRecursivePhysical(subPath)) {
+                    success = FALSE;
+                }
+            }
+        }
+    } else {
+        success = FALSE;
+    }
+
+    FreeDosObject(DOS_FIB, fib);
+    UnLock(lock);
+
+    if (success) {
+        if (!DeleteFile((STRPTR)fullPath)) {
+            success = FALSE;
+        }
+    }
+
+    return success;
+}
+
 ArchVfs* archvfsCreate(const char* searchPath) {
     ArchVfs* vfs = malloc(sizeof(ArchVfs));
     if (!vfs) return NULL;
 
     vfs->searchPaths = listCreate();
+    if (!vfs->searchPaths) {
+        free(vfs);
+        return NULL;
+    }
     
     char* pathCopy = strdup(searchPath);
+    if (!pathCopy) {
+        listDispose(vfs->searchPaths);
+        free(vfs);
+        return NULL;
+    }
     char* token = strtok(pathCopy, ";");
     while (token) {
         SearchPathEntry* entry = malloc(sizeof(SearchPathEntry));
+        if (!entry) {
+            token = strtok(NULL, ";");
+            continue;
+        }
         entry->path = strdup(token);
+        if (!entry->path) {
+            free(entry);
+            token = strtok(NULL, ";");
+            continue;
+        }
         
         // Try opening as archive. We only consider it an archive if it's not a directory.
         BPTR lock = Lock((STRPTR)entry->path, SHARED_LOCK);
@@ -204,6 +260,10 @@ ArchVfsFile* archvfsOpenFile(ArchVfs* vfs, const char* path, const char* mode) {
                 if (dosFile) {
                     if (strchr(mode, 'a')) Seek(dosFile, 0, OFFSET_END);
                     file = calloc(1, sizeof(ArchVfsFile));
+                    if (!file) {
+                        Close(dosFile);
+                        break;
+                    }
                     file->vfs = vfs;
                     file->dosFile = dosFile;
                     file->writeMode = TRUE;
@@ -225,6 +285,11 @@ ArchVfsFile* archvfsOpenFile(ArchVfs* vfs, const char* path, const char* mode) {
                     if (dosFile) {
                         if (strchr(mode, 'a')) Seek(dosFile, 0, OFFSET_END);
                         file = calloc(1, sizeof(ArchVfsFile));
+                        if (!file) {
+                            Close(dosFile);
+                            free(tempFile);
+                            break;
+                        }
                         file->vfs = vfs;
                         file->dosFile = dosFile;
                         file->writeMode = TRUE;
@@ -247,6 +312,10 @@ ArchVfsFile* archvfsOpenFile(ArchVfs* vfs, const char* path, const char* mode) {
                 void* data = archiveReadFile(entry->archive, relPath, &size);
                 if (data) {
                     file = calloc(1, sizeof(ArchVfsFile));
+                    if (!file) {
+                        free(data);
+                        break;
+                    }
                     file->vfs = vfs;
                     file->archiveData = data;
                     file->archiveSize = size;
@@ -260,6 +329,10 @@ ArchVfsFile* archvfsOpenFile(ArchVfs* vfs, const char* path, const char* mode) {
                 BPTR dosFile = Open((STRPTR)fullPath, MODE_OLDFILE);
                 if (dosFile) {
                     file = calloc(1, sizeof(ArchVfsFile));
+                    if (!file) {
+                        Close(dosFile);
+                        break;
+                    }
                     file->vfs = vfs;
                     file->dosFile = dosFile;
                     file->sourceEntry = entry;
@@ -310,9 +383,21 @@ void archvfsCloseFile(ArchVfsFile* file) {
 
 ArchVfsDir* archvfsOpenDir(ArchVfs* vfs, const char* path) {
     ArchVfsDir* dir = calloc(1, sizeof(ArchVfsDir));
+    if (!dir) {
+        return NULL;
+    }
     dir->vfs = vfs;
     dir->virtualPath = translatePath(path);
+    if (!dir->virtualPath) {
+        free(dir);
+        return NULL;
+    }
     dir->seenEntries = listCreate();
+    if (!dir->seenEntries) {
+        free(dir->virtualPath);
+        free(dir);
+        return NULL;
+    }
     return dir;
 }
 
@@ -517,16 +602,9 @@ BOOL archvfsDelete(ArchVfs* vfs, const char* path) {
                     success = TRUE;
                 } else {
                     // Try recursive
-                    ArchVfsDir* d = archvfsOpenDir(vfs, path);
-                    ArchVfsDirEntry de;
-                    BOOL ok = TRUE;
-                    while (archvfsReadDir(d, &de)) {
-                        char subPath[512];
-                        snprintf(subPath, sizeof(subPath), "%s/%s", path, de.name);
-                        if (!archvfsDelete(vfs, subPath)) ok = FALSE;
+                    if (deleteRecursivePhysical(fullPath)) {
+                        success = TRUE;
                     }
-                    archvfsCloseDir(d);
-                    if (ok) success = DeleteFile((STRPTR)fullPath);
                 }
                 if (success) break;
             }
